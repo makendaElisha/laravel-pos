@@ -9,10 +9,19 @@ class Product extends Model
     protected $fillable = [
         'name',
         'description',
-        'image',
-        'barcode',
-        'price',
+        'code',
+        'buy_price',
+        'sell_price',
         'quantity',
-        'status'
+        'items_in_box',
     ];
+
+    /**
+     * Get the shopProducts that owns the Product
+     *
+     */
+    public function shopProducts()
+    {
+        return $this->belongsTo(ShopProduct::class);
+    }
 }

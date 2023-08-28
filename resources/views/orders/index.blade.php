@@ -1,9 +1,9 @@
 @extends('layouts.admin')
 
-@section('title', 'Orders List')
-@section('content-header', 'Order List')
+@section('title', 'Factures')
+@section('content-header', 'List Des Factures')
 @section('content-actions')
-    <a href="{{route('cart.index')}}" class="btn btn-primary">Open POS</a>
+    {{-- <a href="{{route('cart.index')}}" class="btn btn-primary">Open POS</a> --}}
 @endsection
 
 @section('content')
@@ -21,7 +21,7 @@
                             <input type="date" name="end_date" class="form-control" value="{{request('end_date')}}" />
                         </div>
                         <div class="col-md-2">
-                            <button class="btn btn-outline-primary" type="submit">Submit</button>
+                            <button class="btn btn-outline-primary" type="submit">Filtrer</button>
                         </div>
                     </div>
                 </form>
@@ -30,34 +30,20 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Customer Name</th>
+                    <th>Num Facture</th>
+                    <th>Client</th>
                     <th>Total</th>
-                    <th>Received Amount</th>
-                    <th>Status</th>
-                    <th>To Pay</th>
-                    <th>Created At</th>
+                    <th>Crée par</th>
+                    <th>Date</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($orders as $order)
                 <tr>
-                    <td>{{$order->id}}</td>
-                    <td>{{$order->getCustomerName()}}</td>
-                    <td>{{ config('settings.currency_symbol') }} {{$order->formattedTotal()}}</td>
-                    <td>{{ config('settings.currency_symbol') }} {{$order->formattedReceivedAmount()}}</td>
-                    <td>
-                        @if($order->receivedAmount() == 0)
-                            <span class="badge badge-danger">Not Paid</span>
-                        @elseif($order->receivedAmount() < $order->total())
-                            <span class="badge badge-warning">Partial</span>
-                        @elseif($order->receivedAmount() == $order->total())
-                            <span class="badge badge-success">Paid</span>
-                        @elseif($order->receivedAmount() > $order->total())
-                            <span class="badge badge-info">Change</span>
-                        @endif
-                    </td>
-                    <td>{{config('settings.currency_symbol')}} {{number_format($order->total() - $order->receivedAmount(), 2)}}</td>
+                    <td>{{$order->order_number}}</td>
+                    <td>{{$order->customer}}</td>
+                    <td>{{ config('settings.currency_symbol') }} {{$order->paid}}</td>
+                    <td>{{$order->user->first_name}}</td>
                     <td>{{$order->created_at}}</td>
                 </tr>
                 @endforeach
@@ -65,10 +51,7 @@
             <tfoot>
                 <tr>
                     <th></th>
-                    <th></th>
                     <th>{{ config('settings.currency_symbol') }} {{ number_format($total, 2) }}</th>
-                    <th>{{ config('settings.currency_symbol') }} {{ number_format($receivedAmount, 2) }}</th>
-                    <th></th>
                     <th></th>
                     <th></th>
                 </tr>

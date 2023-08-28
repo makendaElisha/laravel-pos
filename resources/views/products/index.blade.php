@@ -14,15 +14,10 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Image</th>
-                    <th>Barcode</th>
-                    <th>Price</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                    <th>Created At</th>
-                    <th>Updated At</th>
+                    <th>Code</th>
+                    <th>Description</th>
+                    <th>Stock</th>
+                    <th>Prix</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -31,21 +26,21 @@
                 <tr>
                     <td>{{$product->id}}</td>
                     <td>{{$product->name}}</td>
-                    <td><img class="product-img" src="{{ Storage::url($product->image) }}" alt=""></td>
-                    <td>{{$product->barcode}}</td>
-                    <td>{{$product->price}}</td>
                     <td>{{$product->quantity}}</td>
-                    <td>
-                        <span
-                            class="right badge badge-{{ $product->status ? 'success' : 'danger' }}">{{$product->status ? 'Active' : 'Inactive'}}</span>
-                    </td>
-                    <td>{{$product->created_at}}</td>
-                    <td>{{$product->updated_at}}</td>
+                    <td>{{$product->sell_price}} F.C</td>
                     <td>
                         <a href="{{ route('products.edit', $product) }}" class="btn btn-primary"><i
                                 class="fas fa-edit"></i></a>
                         <button class="btn btn-danger btn-delete" data-url="{{route('products.destroy', $product)}}"><i
                                 class="fas fa-trash"></i></button>
+                        <button class="btn btn-success btn-seccess"
+                                data-toggle="modal"
+                                data-target="#myModal"
+                                data-item-id="{{ $product->id }}"
+                                data-item-code="{{ $product->id }}"
+                            >
+                            <i class="fas fa-truck"></i>
+                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -53,14 +48,52 @@
         </table>
         {{ $products->render() }}
     </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header justify-content-center">
+                    <h5 class="modal-title text-bold" id="exampleModalLabel">Article ( <span id="modalItemId"></span> ) vers Magasins</h5>
+                </div>
+                <div class="modal-body">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Magasin</th>
+                                <th>Stock</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach($shops as $shop)
+                                <tr>
+                                    <td>{{ $shop->name }}</td>
+                                    <td>{{ $shop->id }}</td>
+                                    <td id="stock-quantity-{{ $shop->id }}"></td>
+                                    <td id="action-button-{{ $shop->id }}"></td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
 @section('js')
 <script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+
 <script>
     $(document).ready(function () {
         $(document).on('click', '.btn-delete', function () {
+            console.log('will delete');
             $this = $(this);
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -71,11 +104,11 @@
                 })
 
                 swalWithBootstrapButtons.fire({
-                title: 'Are you sure?',
-                text: "Do you really want to delete this product?",
+                title: 'Etes-vous sur?',
+                text: "Voulez-vous vraiment supprimer cet article?",
                 icon: 'warning',
                 showCancelButton: true,
-                confirmButtonText: 'Yes, delete it!',
+                confirmButtonText: 'Oui, Supprimer!',
                 cancelButtonText: 'No',
                 reverseButtons: true
                 }).then((result) => {
@@ -88,6 +121,49 @@
                 }
             })
         })
+
+        $('#myModal').on('show.bs.modal', function (event) {
+            $this = $(this);
+            var $shops = {!! $shops !!};
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var itemId = button.data('item-id'); // Extract data-id attribute from button
+            var itemCode = button.data('item-code'); // Extract data-code attribute from button
+
+            console.log('RES ', itemId, itemCode);
+
+            $(this).find('#modalItemId').text(itemCode);
+
+            $shops.forEach(shop => {
+                var createButton = $('<button>', {
+                    class: 'btn btn-success',
+                    text: 'Créer',
+                    click: function() {
+                        $.post(`/api/create-product-shop/${shop.id}/product/${itemId}`, {_token: '{{csrf_token()}}'}, function (res) {
+                            if (res.product) {
+                                $('#action-button-' + shop.id).remove();
+                                // $('#action-button-' + shop.id).replaceWith(deleteButton);
+                            }
+                        })
+                    }
+                });
+                var deleteButton = $('<button>', {
+                    class: 'btn btn-danger',
+                    text: 'Supprimer',
+                    click: function() {
+                        alert('Delete clicked for shop with ID: ' + shop.id);
+                    }
+                });
+
+                //Show action button
+                $('#action-button-' + shop.id).append(createButton);
+
+                //Get quantities
+                $.get(`/api/get-quantity/shop/${shop.id}/product/${itemId}`, function(result, state) {
+                    console.log('The result ', result);
+                });
+
+            });
+        });
     })
 </script>
 @endsection

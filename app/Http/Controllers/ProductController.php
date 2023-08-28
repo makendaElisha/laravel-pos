@@ -6,7 +6,11 @@ use App\Http\Requests\ProductStoreRequest;
 use App\Http\Requests\ProductUpdateRequest;
 use App\Http\Resources\ProductResource;
 use App\Models\Product;
+use App\Models\Shop;
+use App\Models\ShopProduct;
+use App\Models\StockMouvement;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
@@ -16,17 +20,47 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index(Request $request)
+    public function index(Request $request, Shop $shop)
     {
         $products = new Product();
         if ($request->search) {
             $products = $products->where('name', 'LIKE', "%{$request->search}%");
         }
         $products = $products->latest()->paginate(10);
+        $shops = Shop::get();
+        $shopProducts = ShopProduct::get();
+
         if (request()->wantsJson()) {
             return ProductResource::collection($products);
         }
-        return view('products.index')->with('products', $products);
+
+        // dd($shopProducts);
+        return view('products.index')
+            ->with('products', $products)
+            ->with('shops', $shops)
+            ->with('shopProducts', $shopProducts);
+    }
+
+    public function getProducts(Request $request, Shop $shop)
+    {
+        $products = new ShopProduct();
+        // if ($request->search) {
+        //     $products = $products->where('name', 'LIKE', "%{$request->search}%");
+        // }
+        $products = ShopProduct::with('product')
+            ->where('shop_id', $shop->id);
+
+        if ($request->search) {
+            $products = $products->whereHas('product', function ($q) use ($request) {
+                $q->where('name', 'LIKE', "%{$request->search}%");
+            });
+        }
+
+        $products = $products->latest()->paginate(10);
+
+        return response()->json([
+            'products' => $products,
+        ], 200);
     }
 
     /**
@@ -47,26 +81,31 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
-        $image_path = '';
-
-        if ($request->hasFile('image')) {
-            $image_path = $request->file('image')->store('products', 'public');
-        }
-
         $product = Product::create([
             'name' => $request->name,
             'description' => $request->description,
-            'image' => $image_path,
-            'barcode' => $request->barcode,
-            'price' => $request->price,
+            'code' => $request->code,
+            'buy_price' => $request->buy_price,
+            'sell_price' => $request->sell_price,
             'quantity' => $request->quantity,
-            'status' => $request->status
+            'items_in_box' => $request->items_in_box,
         ]);
 
-        if (!$product) {
-            return redirect()->back()->with('error', 'Sorry, there a problem while creating product.');
+        //Log mouvement
+        if ($product->quantity) {
+            StockMouvement::create([
+                'product_id' => $product->id,
+                'type' => StockMouvement::INIT_STOCK,
+                'quantity' => $product->quantity,
+                'user_id' => Auth()->user()->id,
+                'shop_id' => $request->shop_id,
+            ]);
         }
-        return redirect()->route('products.index')->with('success', 'Success, you product have been created.');
+
+        if (!$product) {
+            return redirect()->back()->with('error', 'Desolé, une erreur c\'est produite.');
+        }
+        return redirect()->route('products.index')->with('success', 'Succes, votre produit a été créé.');
     }
 
     /**
@@ -94,34 +133,39 @@ class ProductController extends Controller
     /**
      * Update the specified resource in storage.
      *
-     * @param  \Illuminate\Http\Request  $request
      * @param  \App\Models\Product  $product
      * @return \Illuminate\Http\Response
      */
     public function update(ProductUpdateRequest $request, Product $product)
     {
+        $hasQuantityChanged = false;
+        if ($product->quantity != $request->quantity) {
+            $hasQuantityChanged = true;
+        }
+
         $product->name = $request->name;
         $product->description = $request->description;
-        $product->barcode = $request->barcode;
-        $product->price = $request->price;
+        $product->code = $request->code;
+        $product->buy_price = $request->buy_price;
+        $product->sell_price = $request->sell_price;
+        $product->items_in_box = $request->items_in_box;
         $product->quantity = $request->quantity;
-        $product->status = $request->status;
-
-        if ($request->hasFile('image')) {
-            // Delete old image
-            if ($product->image) {
-                Storage::delete($product->image);
-            }
-            // Store image
-            $image_path = $request->file('image')->store('products', 'public');
-            // Save to Database
-            $product->image = $image_path;
-        }
 
         if (!$product->save()) {
-            return redirect()->back()->with('error', 'Sorry, there\'re a problem while updating product.');
+            return redirect()->back()->with('error', 'Desolé, une erreur c\'est produite.');
         }
-        return redirect()->route('products.index')->with('success', 'Success, your product have been updated.');
+
+        if ($hasQuantityChanged) {
+            //Log mouvement
+            StockMouvement::create([
+                'product_id' => $product->id,
+                'type' => StockMouvement::MANUAL_EDIT,
+                'quantity' => $product->quantity,
+                'user_id' => Auth()->user()->id,
+                'shop_id' => $request->shop_id,
+            ]);
+        }
+        return redirect()->route('products.index')->with('success', 'Succes, l\'article a été mise a jour.');
     }
 
     /**

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ProductQuery;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+Route::get('get-quantity/shop/{shop}/product/{product}', [ProductQuery::class, 'getShopProductQuantity'])->name('get.shop.product.quantity');
+Route::post('set-quantity/shop', [ProductQuery::class, 'setShopProductQuantity'])->name('set.shop.product.quantity');
+Route::post('create-product-shop/{shop}/product/{product}', [ProductQuery::class, 'createProductInShop'])->name('create.shop.product');

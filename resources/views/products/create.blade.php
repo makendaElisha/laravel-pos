@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
-@section('title', 'Create Product')
-@section('content-header', 'Create Product')
+@section('title', 'Créer Article')
+@section('content-header', 'Créer Article')
 
 @section('content')
 
@@ -12,16 +12,26 @@
             @csrf
 
             <div class="form-group">
-                <label for="name">Name</label>
-                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="name"
-                    placeholder="Name" value="{{ old('name') }}">
-                @error('name')
+                <label for="code">Code</label>
+                <input type="text" name="code" class="form-control @error('code') is-invalid @enderror" id="code"
+                    placeholder="code" value="{{ old('code') }}">
+                @error('code')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>
                 @enderror
             </div>
 
+            <div class="form-group">
+                <label for="name">Nom</label>
+                <input type="text" name="name" class="form-control @error('name') is-invalid @enderror" id="name"
+                    placeholder="Nom" value="{{ old('name') }}">
+                @error('name')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
 
             <div class="form-group">
                 <label for="description">Description</label>
@@ -34,66 +44,50 @@
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label for="image">Image</label>
-                <div class="custom-file">
-                    <input type="file" class="custom-file-input" name="image" id="image">
-                    <label class="custom-file-label" for="image">Choose file</label>
+            <div>
+                <div class="form-group">
+                    <label for="sell_price">Prix de Vente</label>
+                    <input type="text" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" id="sell_price"
+                        placeholder="Le prix de vente par piece" value="{{ old('sell_price') }}">
+                    @error('sell_price')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
                 </div>
-                @error('image')
+                <div class="form-group">
+                    <label for="buy_price">Prix d'achat</label>
+                    <input type="text" name="buy_price" class="form-control @error('buy_price') is-invalid @enderror" id="buy_price"
+                        placeholder="Le prix d'achat par piece" value="{{ old('buy_price') }}">
+                    @error('buy_price')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="items_in_box">Nombre de Piece par Carton</label>
+                <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
+                    id="items_in_box" placeholder="items_in_box" value="{{ old('items_in_box', 1) }}">
+                @error('items_in_box')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>
                 @enderror
             </div>
-
             <div class="form-group">
-                <label for="barcode">Barcode</label>
-                <input type="text" name="barcode" class="form-control @error('barcode') is-invalid @enderror"
-                    id="barcode" placeholder="barcode" value="{{ old('barcode') }}">
-                @error('barcode')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="price">Price</label>
-                <input type="text" name="price" class="form-control @error('price') is-invalid @enderror" id="price"
-                    placeholder="price" value="{{ old('price') }}">
-                @error('price')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
-            <div class="form-group">
-                <label for="quantity">Quantity</label>
+                <label for="quantity">Stock Initial (Carton)</label>
                 <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
-                    id="quantity" placeholder="Quantity" value="{{ old('quantity', 1) }}">
+                    id="quantity" placeholder="Quantity" value="{{ old('quantity') }}">
                 @error('quantity')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>
                 @enderror
             </div>
-
-            <div class="form-group">
-                <label for="status">Status</label>
-                <select name="status" class="form-control @error('status') is-invalid @enderror" id="status">
-                    <option value="1" {{ old('status') === 1 ? 'selected' : ''}}>Active</option>
-                    <option value="0" {{ old('status') === 0 ? 'selected' : ''}}>Inactive</option>
-                </select>
-                @error('status')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
-            <button class="btn btn-primary" type="submit">Create</button>
+            <button class="btn btn-primary" type="submit">Créer</button>
         </form>
     </div>
 </div>
@@ -101,6 +95,7 @@
 
 @section('js')
 <script src="{{ asset('plugins/bs-custom-file-input/bs-custom-file-input.min.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
 <script>
     $(document).ready(function () {
         bsCustomFileInput.init();

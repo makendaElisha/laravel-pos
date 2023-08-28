@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('content-header', 'Dashboard')
+@section('content-header', 'Acceuil')
 
 @section('content')
     <div class="container-fluid">
@@ -9,13 +9,13 @@
             <!-- small box -->
             <div class="small-box bg-info">
               <div class="inner">
-                  <h3>{{$orders_count}}</h3>
-                <p>Orders Count</p>
+                  <h3>500 F.C</h3>
+                <p>Ventes Journalieres</p>
               </div>
               <div class="icon">
                 <i class="ion ion-bag"></i>
               </div>
-              <a href="{{route('orders.index')}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              {{-- <a href="{{route('orders.index')}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> --}}
             </div>
           </div>
           <!-- ./col -->
@@ -23,13 +23,13 @@
             <!-- small box -->
             <div class="small-box bg-success">
               <div class="inner">
-                  <h3>{{config('settings.currency_symbol')}} {{number_format($income, 2)}}</h3>
-                <p>Income</p>
+                  <h3>200 F.C</h3>
+                <p>Profit Journalier</p>
               </div>
               <div class="icon">
                 <i class="ion ion-stats-bars"></i>
               </div>
-              <a href="{{route('orders.index')}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              {{-- <a href="{{route('orders.index')}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> --}}
             </div>
           </div>
           <!-- ./col -->
@@ -37,14 +37,15 @@
             <!-- small box -->
             <div class="small-box bg-danger">
               <div class="inner">
-                <h3>{{config('settings.currency_symbol')}} {{number_format($income_today, 2)}}</h3>
+                {{-- <h3>{{config('settings.currency_symbol')}} {{number_format($income_today, 2)}}</h3> --}}
+                <h3>12</h3>
 
-                <p>Income Today</p>
+                <p>Article á Faible Stock</p>
               </div>
               <div class="icon">
                 <i class="ion ion-pie-graph"></i>
               </div>
-              <a href="{{route('orders.index')}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              {{-- <a href="{{route('orders.index')}}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> --}}
             </div>
           </div>
           <!-- ./col -->
@@ -52,14 +53,14 @@
             <!-- small box -->
             <div class="small-box bg-warning">
               <div class="inner">
-                <h3>{{$customers_count}}</h3>
+                <h3>120</h3>
 
-                <p>Customers Count</p>
+                <p>Nombre De Clients</p>
               </div>
               <div class="icon">
                 <i class="ion ion-person-add"></i>
               </div>
-              <a href="{{ route('customers.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+              {{-- <a href="{{ route('customers.index') }}" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a> --}}
             </div>
           </div>
           <!-- ./col -->

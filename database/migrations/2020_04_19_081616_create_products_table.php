@@ -17,10 +17,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->string('code')->unique();
+            $table->decimal('buy_price', 8, 2)->nullable();
+            $table->decimal('sell_price', 8, 2)->nullable();
+            $table->integer('quantity')->nullable();
+            $table->integer('items_in_box')->nullable();
             $table->string('image')->nullable();
-            $table->string('barcode')->unique();
-            $table->decimal('price', 8, 2);
-            $table->boolean('status')->default(true);
             $table->timestamps();
         });
     }

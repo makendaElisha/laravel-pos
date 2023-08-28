@@ -25,25 +25,41 @@
                 <li class="nav-item has-treeview">
                     <a href="{{route('home')}}" class="nav-link">
                         <i class="nav-icon fas fa-tachometer-alt"></i>
-                        <p>Dashboard</p>
+                        <p>Acceuil</p>
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
                     <a href="{{ route('products.index') }}" class="nav-link {{ activeSegment('products') }}">
-                        <i class="nav-icon fas fa-th-large"></i>
-                        <p>Products</p>
+                        <i class="nav-icon fas fa-shopping-basket"></i>
+                        <p>Articles (Depot)</p>
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
+                    <a href="#" class="nav-link {{ activeSegment('shops') }}">
+                        <i class="nav-icon fas fa-th-large"></i>
+                        <p>Magasins</p>
+                    </a>
+                    <div class="pl-3">
+                        @foreach (\App\Models\Shop::get() as $shop)
+                            <div class="nav-item has-treeview">
+                                <a href="{{ route('shop.products.index', $shop->id) }}" class="nav-link {{ activeSegment("shop") }}">
+                                    <i class="nav-icon fas fa-home"></i>
+                                    <p>{{ $shop->name }}</p>
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </li>
+                {{-- <li class="nav-item has-treeview">
                     <a href="{{ route('cart.index') }}" class="nav-link {{ activeSegment('cart') }}">
                         <i class="nav-icon fas fa-cart-plus"></i>
                         <p>Open POS</p>
                     </a>
-                </li>
+                </li> --}}
                 <li class="nav-item has-treeview">
                     <a href="{{ route('orders.index') }}" class="nav-link {{ activeSegment('orders') }}">
                         <i class="nav-icon fas fa-cart-plus"></i>
-                        <p>Orders</p>
+                        <p>Factures</p>
                     </a>
                 </li>
                 <li class="nav-item has-treeview">
@@ -52,6 +68,12 @@
                         <p>Customers</p>
                     </a>
                 </li>
+                {{-- <li class="nav-item has-treeview">
+                    <a href="{{ route('shops.index') }}" class="nav-link {{ activeSegment('shops') }}">
+                        <i class="nav-icon fas fa-users"></i>
+                        <p>Gestion Mag</p>
+                    </a>
+                </li> --}}
                 <li class="nav-item has-treeview">
                     <a href="{{ route('settings.index') }}" class="nav-link {{ activeSegment('settings') }}">
                         <i class="nav-icon fas fa-cogs"></i>

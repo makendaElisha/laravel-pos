@@ -3,7 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-
+use Illuminate\Validation\Rule;
 class ProductUpdateRequest extends FormRequest
 {
     /**
@@ -28,10 +28,16 @@ class ProductUpdateRequest extends FormRequest
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'image' => 'nullable|image',
-            'barcode' => 'required|string|max:50|unique:products,barcode,' . $product_id,
-            'price' => 'required|regex:/^\d+(\.\d{1,2})?$/',
-            'quantity' => 'required|integer',
-            'status' => 'required|boolean',
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                Rule::unique('products')->ignore($product_id),
+            ],
+            'buy_price' => 'nullable|numeric',
+            'sell_price' => 'required|numeric',
+            'quantity' => 'nullable|integer',
+            'items_in_box' => 'nullable|integer',
         ];
     }
 }

@@ -11,14 +11,20 @@ class Cart extends Component {
             cart: [],
             products: [],
             customers: [],
-            barcode: "",
+            code: "",
             search: "",
             customer_id: "",
+            customer: "",
+            discount: null,
+            discountPercent: null,
+            shopId: null,
         };
 
+        this.setShop = this.setShop.bind(this);
         this.loadCart = this.loadCart.bind(this);
-        this.handleOnChangeBarcode = this.handleOnChangeBarcode.bind(this);
-        this.handleScanBarcode = this.handleScanBarcode.bind(this);
+        this.loadDiscount = this.loadDiscount.bind(this);
+        this.handleOnChangeCode = this.handleOnChangeCode.bind(this);
+        this.handleScanCode = this.handleScanCode.bind(this);
         this.handleChangeQty = this.handleChangeQty.bind(this);
         this.handleEmptyCart = this.handleEmptyCart.bind(this);
 
@@ -26,14 +32,19 @@ class Cart extends Component {
         this.handleChangeSearch = this.handleChangeSearch.bind(this);
         this.handleSeach = this.handleSeach.bind(this);
         this.setCustomerId = this.setCustomerId.bind(this);
+        this.setCustomer = this.setCustomer.bind(this);
         this.handleClickSubmit = this.handleClickSubmit.bind(this);
     }
 
     componentDidMount() {
+        //get shop id
+        this.setShop();
+
         // load user cart
         this.loadCart();
         this.loadProducts();
         this.loadCustomers();
+        this.loadDiscount();
     }
 
     loadCustomers() {
@@ -43,36 +54,55 @@ class Cart extends Component {
         });
     }
 
+    setShop() {
+        const url = window.location.href;
+        const parts = url.split('/');
+        const shopId = parts[parts.length - 2];
+        this.setState({ shopId: shopId });
+    }
+
+    loadDiscount() {
+        axios.get(`/admin/settings/get-discount`).then((res) => {
+            if (res && res.data) {
+                this.setState({ discount: res.data.discount });
+                this.setState({ discountPercent: res.data.discount_percent });
+            }
+        });
+    }
+
     loadProducts(search = "") {
+        const url = window.location.href;
+        const parts = url.split('/');
+        const shopId = parts[parts.length - 2];
+
         const query = !!search ? `?search=${search}` : "";
-        axios.get(`/admin/products${query}`).then((res) => {
-            const products = res.data.data;
+        axios.get(`/admin/shop-items/${shopId}/products${query}`).then((res) => {
+            const products = res.data.products.data;
             this.setState({ products });
         });
     }
 
-    handleOnChangeBarcode(event) {
-        const barcode = event.target.value;
-        console.log(barcode);
-        this.setState({ barcode });
+    handleOnChangeCode(event) {
+        const code = event.target.value;
+        this.setState({ code });
     }
 
     loadCart() {
-        axios.get("/admin/cart").then((res) => {
-            const cart = res.data;
-            this.setState({ cart });
-        });
+        // axios.get("/admin/cart").then((res) => {
+        //     const cart = res.data;
+        //     this.setState({ cart });
+        // });
     }
 
-    handleScanBarcode(event) {
+    handleScanCode(event) {
         event.preventDefault();
-        const { barcode } = this.state;
-        if (!!barcode) {
+        const { code } = this.state;
+        if (!!code) {
             axios
-                .post("/admin/cart", { barcode })
+                .post("/admin/cart", { code })
                 .then((res) => {
                     this.loadCart();
-                    this.setState({ barcode: "" });
+                    this.setState({ code: "" });
                 })
                 .catch((err) => {
                     Swal.fire("Error!", err.response.data.message, "error");
@@ -80,40 +110,53 @@ class Cart extends Component {
         }
     }
     handleChangeQty(product_id, qty) {
+        if (!qty) return;
         const cart = this.state.cart.map((c) => {
-            if (c.id === product_id) {
-                c.pivot.quantity = qty;
+            if (c.product_id === product_id && Number(qty) <= Number(c.max_qty)) {
+                c.quantity = Number(qty);
             }
             return c;
         });
 
-        this.setState({ cart });
-        if (!qty) return;
+        this.setState({ cart: [] });
+        this.setState({ cart: cart });
 
-        axios
-            .post("/admin/cart/change-qty", { product_id, quantity: qty })
-            .then((res) => {})
-            .catch((err) => {
-                Swal.fire("Error!", err.response.data.message, "error");
-            });
+        // axios
+        //     .post("/admin/cart/change-qty", { product_id, quantity: qty })
+        //     .then((res) => {})
+        //     .catch((err) => {
+        //         Swal.fire("Error!", err.response.data.message, "error");
+        //     });
     }
 
     getTotal(cart) {
-        const total = cart.map((c) => c.pivot.quantity * c.price);
+        const total = cart?.map((c) => c.quantity * c.product.sell_price);
         return sum(total).toFixed(2);
     }
+
+    getDiscount(cart) {
+        let total = this.getTotal(cart);
+        let discountAmount = 0;
+
+        if (this.state.discount && this.state.discountPercent && total >= this.state.discount) {
+            discountAmount = total * this.state.discountPercent / 100;
+        }
+
+
+        return discountAmount;
+    }
+
+    getTotalToPay(cart) {
+        return this.getTotal(cart) - this.getDiscount(cart);
+    }
+
     handleClickDelete(product_id) {
-        axios
-            .post("/admin/cart/delete", { product_id, _method: "DELETE" })
-            .then((res) => {
-                const cart = this.state.cart.filter((c) => c.id !== product_id);
-                this.setState({ cart });
-            });
+        const cart = this.state.cart.filter((c) => c.product_id !== product_id);
+        this.setState({ cart });
     }
     handleEmptyCart() {
-        axios.post("/admin/cart/empty", { _method: "DELETE" }).then((res) => {
-            this.setState({ cart: [] });
-        });
+        this.setState({ customer: "" });
+        this.setState({ cart: [] });
     }
     handleChangeSearch(event) {
         const search = event.target.value;
@@ -125,20 +168,22 @@ class Cart extends Component {
         }
     }
 
-    addProductToCart(barcode) {
-        let product = this.state.products.find((p) => p.barcode === barcode);
+    addProductToCart(id) {
+        let product = this.state.products.find((p) => p.id === id);
         if (!!product) {
+
             // if product is already in cart
-            let cart = this.state.cart.find((c) => c.id === product.id);
-            if (!!cart) {
+            let cartProd = this.state.cart.find((c) => c.product_id === product.id);
+            if (!!cartProd) {
+
                 // update quantity
                 this.setState({
                     cart: this.state.cart.map((c) => {
                         if (
-                            c.id === product.id &&
-                            product.quantity > c.pivot.quantity
+                            c.product_id === product.id &&
+                            product.quantity > c.quantity
                         ) {
-                            c.pivot.quantity = c.pivot.quantity + 1;
+                            c.quantity = c.quantity + 1;
                         }
                         return c;
                     }),
@@ -147,49 +192,54 @@ class Cart extends Component {
                 if (product.quantity > 0) {
                     product = {
                         ...product,
-                        pivot: {
-                            quantity: 1,
-                            product_id: product.id,
-                            user_id: 1,
-                        },
+                        product_id: product.id,
+                        quantity: 1,
+                        max_qty: product.quantity,
                     };
 
                     this.setState({ cart: [...this.state.cart, product] });
                 }
             }
 
-            axios
-                .post("/admin/cart", { barcode })
-                .then((res) => {
-                    // this.loadCart();
-                    console.log(res);
-                })
-                .catch((err) => {
-                    Swal.fire("Error!", err.response.data.message, "error");
-                });
+            // axios
+            //     .post("/admin/cart", { id })
+            //     .then((res) => {
+            //         // this.loadCart();
+            //     })
+            //     .catch((err) => {
+            //         Swal.fire("Error!", err.response.data.message, "error");
+            //     });
         }
     }
 
     setCustomerId(event) {
         this.setState({ customer_id: event.target.value });
     }
+
+    setCustomer(event) {
+        this.setState({ customer: event });
+    }
     handleClickSubmit() {
         Swal.fire({
-            title: "Received Amount",
-            input: "text",
-            inputValue: this.getTotal(this.state.cart),
+            title: "Veuillez confirmer",
+            // input: "text",
+            // inputValue: this.getTotal(this.state.cart),
             showCancelButton: true,
-            confirmButtonText: "Send",
+            confirmButtonText: "Imprimer",
+            cancelButtonText: "Annuler",
             showLoaderOnConfirm: true,
             preConfirm: (amount) => {
                 return axios
-                    .post("/admin/orders", {
-                        customer_id: this.state.customer_id,
-                        amount,
+                    .post("/admin/cart-orders", {
+                        customer: this.state.customer,
+                        shop_id: this.state.shopId,
+                        cart: this.state.cart,
+                        total: this.getTotal(this.state.cart),
+                        discount: this.getDiscount(this.state.cart),
+                        paid: this.getTotalToPay(this.state.cart),
                     })
                     .then((res) => {
-                        this.loadCart();
-                        return res.data;
+                        location.reload();
                     })
                     .catch((err) => {
                         Swal.showValidationMessage(err.response.data.message);
@@ -203,24 +253,35 @@ class Cart extends Component {
         });
     }
     render() {
-        const { cart, products, customers, barcode } = this.state;
+        const { cart, products, customers,customer, code } = this.state;
         return (
             <div className="row">
                 <div className="col-md-6 col-lg-4">
                     <div className="row mb-2">
-                        <div className="col">
-                            <form onSubmit={this.handleScanBarcode}>
+                        {/* <div className="col">
+                            <form onSubmit={this.handleScanCode}>
                                 <input
                                     type="text"
                                     className="form-control"
-                                    placeholder="Scan Barcode..."
-                                    value={barcode}
-                                    onChange={this.handleOnChangeBarcode}
+                                    placeholder="Scan Code..."
+                                    value={code}
+                                    onChange={this.handleOnChangeCode}
                                 />
                             </form>
-                        </div>
+                        </div> */}
                         <div className="col">
-                            <select
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={customer}
+                                placeholder="Nom du Client"
+                                onChange={(event) =>
+                                    this.setCustomer(
+                                        event.target.value
+                                    )
+                                }
+                            />
+                            {/* <select
                                 className="form-control"
                                 onChange={this.setCustomerId}
                             >
@@ -231,7 +292,7 @@ class Cart extends Component {
                                         value={cus.id}
                                     >{`${cus.first_name} ${cus.last_name}`}</option>
                                 ))}
-                            </select>
+                            </select> */}
                         </div>
                     </div>
                     <div className="user-cart">
@@ -247,15 +308,15 @@ class Cart extends Component {
                                 <tbody>
                                     {cart.map((c) => (
                                         <tr key={c.id}>
-                                            <td>{c.name}</td>
+                                            <td>{c.product.name}</td>
                                             <td>
                                                 <input
                                                     type="text"
-                                                    className="form-control form-control-sm qty"
-                                                    value={c.pivot.quantity}
+                                                    className="form-control form-control-sm qty mr-1"
+                                                    value={c.quantity}
                                                     onChange={(event) =>
                                                         this.handleChangeQty(
-                                                            c.id,
+                                                            c.product_id,
                                                             event.target.value
                                                         )
                                                     }
@@ -264,7 +325,7 @@ class Cart extends Component {
                                                     className="btn btn-danger btn-sm"
                                                     onClick={() =>
                                                         this.handleClickDelete(
-                                                            c.id
+                                                            c.product_id
                                                         )
                                                     }
                                                 >
@@ -274,7 +335,7 @@ class Cart extends Component {
                                             <td className="text-right">
                                                 {window.APP.currency_symbol}{" "}
                                                 {(
-                                                    c.price * c.pivot.quantity
+                                                    c.product.sell_price * c.quantity
                                                 ).toFixed(2)}
                                             </td>
                                         </tr>
@@ -284,12 +345,26 @@ class Cart extends Component {
                         </div>
                     </div>
 
-                    <div className="row">
-                        <div className="col">Total:</div>
-                        <div className="col text-right">
-                            {window.APP.currency_symbol} {this.getTotal(cart)}
-                        </div>
+                    <div className="card my-2 p-3">
+                        <table>
+                            <tr className="text-right">
+                                <td></td>
+                                <td>Total:</td>
+                                <td className="text-left pl-2">{window.APP.currency_symbol} {this.getTotal(cart)}</td>
+                            </tr>
+                            <tr className="text-right">
+                                <td></td>
+                                <td>Reduction:</td>
+                                <td className="text-left pl-2">{window.APP.currency_symbol} {this.getDiscount(cart)}</td>
+                            </tr>
+                            <tr className="text-right">
+                                <td></td>
+                                <td>Montant á Payer:</td>
+                                <td className="text-left pl-2">{window.APP.currency_symbol} {this.getTotalToPay(cart)}</td>
+                            </tr>
+                        </table>
                     </div>
+
                     <div className="row">
                         <div className="col">
                             <button
@@ -298,7 +373,7 @@ class Cart extends Component {
                                 onClick={this.handleEmptyCart}
                                 disabled={!cart.length}
                             >
-                                Cancel
+                                Annuler
                             </button>
                         </div>
                         <div className="col">
@@ -308,7 +383,7 @@ class Cart extends Component {
                                 disabled={!cart.length}
                                 onClick={this.handleClickSubmit}
                             >
-                                Submit
+                                Sauvegarder
                             </button>
                         </div>
                     </div>
@@ -326,20 +401,14 @@ class Cart extends Component {
                     <div className="order-product">
                         {products.map((p) => (
                             <div
-                                onClick={() => this.addProductToCart(p.barcode)}
+                                onClick={() => this.addProductToCart(p.id)}
                                 key={p.id}
-                                className="item"
+                                className="item p-3 w-100 h-100"
+                                style={{ maxWidth: '200px', maxHeight: '160px' }}
                             >
-                                <img src={p.image_url} alt="" />
-                                <h5
-                                    style={
-                                        window.APP.warning_quantity > p.quantity
-                                            ? { color: "red" }
-                                            : {}
-                                    }
-                                >
-                                    {p.name}({p.quantity})
-                                </h5>
+                                <h5 className="text-center mb-3 font-weight-bold">{ p.product.name }</h5>
+                                <div>Stock Mag: {p.quantity}</div>
+                                <div className="blockquote-footer">Pcs/carton: {p.product.items_in_box}</div>
                             </div>
                         ))}
                     </div>

@@ -7,8 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class Order extends Model
 {
     protected $fillable = [
-        'customer_id',
-        'user_id'
+        'order_number',
+        'shop_id',
+        'customer',
+        'user_id',
+        'total',
+        'discount',
+        'paid',
     ];
 
     public function items()
@@ -24,6 +29,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 
     public function getCustomerName()

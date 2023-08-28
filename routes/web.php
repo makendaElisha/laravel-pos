@@ -6,6 +6,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ShopController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -13,17 +14,30 @@ Route::get('/', function () {
     return redirect('/admin');
 });
 
+Route::get('assets/{path}', function ($path) {
+    return response()->file(public_path("assets/$path"));
+});
+
 Auth::routes();
 
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
+    Route::get('/settings/get-discount', [SettingController::class, 'getDiscount'])->name('settings.get.discount');
     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
+
+    Route::get('shop-items/{shop}/products', [ProductController::class, 'getProducts'])->name('products.index');
     Route::resource('products', ProductController::class);
+
+
+    Route::get('/shop/{shop}/products', [ShopController::class, 'index'])->name('shop.products.index');
     Route::resource('customers', CustomerController::class);
+    Route::post('/cart-orders', [OrderController::class, 'storeCart'])->name('shop.cart.store');
     Route::resource('orders', OrderController::class);
 
+    //To be removed
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+    Route::get('/shop/{shop}/cart', [CartController::class, 'index'])->name('shop.cart.index');
     Route::post('/cart', [CartController::class, 'store'])->name('cart.store');
     Route::post('/cart/change-qty', [CartController::class, 'changeQty']);
     Route::delete('/cart/delete', [CartController::class, 'delete']);

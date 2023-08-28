@@ -29,6 +29,29 @@
                 @enderror
             </div>
 
+            <div class="form-row">
+                <div class="form-group mr-3">
+                    <label for="min_discount_amount">Montant Minimal Reduction</label>
+                    <input type="text" name="min_discount_amount" class="form-control @error('min_discount_amount') is-invalid @enderror" id="min_discount_amount" placeholder="Ex: 200.000" value="{{ old('min_discount_amount', config('settings.min_discount_amount')) }}">
+                    @error('min_discount_amount')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+                <div class="form-group">
+                    <label for="discount_percentage">% á Reduire</label>
+                    <input type="text" name="discount_percentage" class="form-control @error('discount_percentage') is-invalid @enderror" id="discount_percentage" placeholder="Ex: 15" value="{{ old('discount_percentage', config('settings.discount_percentage')) }}">
+                    @error('discount_percentage')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+            </div>
+
+
             <div class="form-group">
                 <label for="currency_symbol">Currency symbol</label>
                 <input type="text" name="currency_symbol" class="form-control @error('currency_symbol') is-invalid @enderror" id="currency_symbol" placeholder="Currency symbol" value="{{ old('currency_symbol', config('settings.currency_symbol')) }}">
