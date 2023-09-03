@@ -12,6 +12,7 @@ class StockMouvement extends Model
     public const CREATE_BILL = 'create_bill';
     public const CANCEL_BILL = 'cancel_bill';
     public const STORE_INCREASE = 'store_increase';
+    public const STORE_RETURN = 'store_return';
     public const SHOP_INCREASE = 'shop_increase';
     public const MANUAL_EDIT = 'manual_edit';
     public const INIT_STOCK = 'init_stock';

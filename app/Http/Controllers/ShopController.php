@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\ShopProduct;
 use App\Models\StockMouvement;
+use App\Models\TransferShopProduct;
 use Illuminate\Http\Request;
 
 class ShopController extends Controller
@@ -16,8 +17,20 @@ class ShopController extends Controller
     public function index(Request $request, Shop $shop)
     {
         $shopProducts = ShopProduct::with('product')->where('shop_id', $shop->id)
-            ->latest()->paginate(10);
+        ->latest()->paginate(10);
+            // ->get();
         $shops = Shop::get();
+
+        foreach ($shopProducts as $key => $shopProd) {
+            $trans = TransferShopProduct::where('shop_id', $shop->id)
+                ->where('product_id', $shopProd->product_id)
+                ->first();
+            if ($trans) {
+                $shopProd->transfer_quantity = $trans->quantity;
+                $shopProd->transfer_id = $trans->id;
+            }
+
+        }
 
         // if ($request->search) {
         //     $shopProducts = $shopProducts->where('name', 'LIKE', "%{$request->search}%");
@@ -27,6 +40,7 @@ class ShopController extends Controller
             'products' => $shopProducts,
             'shop' => $shop,
             'shops' => $shops,
+            'user' => Auth()->user(),
             'userId' => Auth()->user()->id,
         ]);
     }

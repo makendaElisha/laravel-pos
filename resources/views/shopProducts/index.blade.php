@@ -22,7 +22,7 @@
                 <tr>
                     <th>Code</th>
                     <th>Description</th>
-                    <th>Stock</th>
+                    <th>Stock Magasin</th>
                     <th>Prix</th>
                     <th>Actions</th>
                 </tr>
@@ -35,15 +35,29 @@
                     <td>{{$shopProd->quantity}}</td>
                     <td>{{$shopProd->product->sell_price}} F.C</td>
                     <td>
+                        @if ($shopProd->transfer_quantity > 0)
+                            @if ($user->is_admin)
+                                <button class="btn btn-danger"
+                                    data-toggle="modal"
+                                    data-target="#updateStock"
+                                    data-product="{{ $shopProd }}"
+                                    data-toggle="tooltip" data-placement="bottom" title="Annuler Transfer"
+                                >
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </button>
+                            @else
+                                <button class="btn btn-success"
+                                    data-toggle="modal"
+                                    data-target="#updateStock"
+                                    data-product="{{ $shopProd }}"
+                                    data-toggle="tooltip" data-placement="bottom" title="Valider Transfer"
+                                >
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </button>
+                            @endif
+                        @endif
                         {{-- <a href="{{ route('products.edit', $shopProd->product) }}" class="btn btn-primary"><i
                                 class="fas fa-edit"></i></a> --}}
-                        <button class="btn btn-success"
-                            data-toggle="modal"
-                            data-target="#updateStock"
-                            data-product="{{ $shopProd }}"
-                        >
-                            <i class="fas fa-add"></i>
-                        </button>
                     </td>
                 </tr>
                 @endforeach
@@ -55,19 +69,23 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="updateStockLabel">Ajout au stock de: <span id="articleName"><span></h5>
+                    @if ($user->is_admin)
+                        <h5 class="modal-title" id="updateStockLabel"><b class="text-danger">ANNULER Transfer</b>: <span id="articleName"><span></h5>
+                    @else
+                        <h5 class="modal-title" id="updateStockLabel"><b class="text-success">Valider Transfer</b>: <span id="articleName"><span></h5>
+                    @endif
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h6>Stock Present: <span id="articleStock"></span></h6>
+                    <h6>Quantité Envoyée: <u id="articleStock" style="font-size: 1.2rem;" class="pr-1"></u><i>CRT</i></h6>
                     <label for="inputField">Quantité:</label>
-                    <input type="text" id="inputField" class="form-control" placeholder="Entrez la valeur">
+                    <input type="number" id="inputField" max="20" class="form-control" placeholder="Entrez la valeur">
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer d-flex flex-row justify-content-between">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" id="confirmButton">Ajouter</button>
+                    <button type="button" class="btn btn-primary" id="confirmButton">Valider</button>
                 </div>
             </div>
         </div>
@@ -84,21 +102,26 @@
         $('#updateStock').on('show.bs.modal', function (event) {
             $this = $(this);
             var $shop = {!! $shop !!};
+            var $user = {!! $user !!};
+            var is_admin = $user.is_admin ? 1 : 0;
             var $userId = {!! $userId !!};
             var button = $(event.relatedTarget); // Button that triggered the modal
             var prodShop = button.data('product');
             var itemId = prodShop?.product.id;
+            var displayName = prodShop.product ? `${prodShop.product.name} (code: ${prodShop.product.code})` : '';
 
-            $(this).find('#articleName').text(prodShop.product.name ?? '');
-            $(this).find('#articleStock').text(prodShop.quantity ?? '');
+            $(this).find('#articleName').text(displayName);
+            $(this).find('#articleStock').text(prodShop.transfer_quantity ?? '');
 
             $('#confirmButton').click(function(){
                 var quantity = $("#inputField").val();
 
                 $.post("/api/set-quantity/shop", {
                     _token: '{{csrf_token()}}',
+                    is_admin:  is_admin,
                     product_id: itemId,
                     shop_prod_id: prodShop.id,
+                    trans_prod_id: prodShop.transfer_id,
                     shop_id: $shop.id,
                     quantity: quantity,
                     user_id: $userId,
@@ -107,11 +130,6 @@
                         location.reload();
                     }
                 })
-            });
-
-            //Add quantities
-            $.post(`/api/set-quantity/shop/${$shop.id}/product/${itemId}`, function(result, state) {
-                console.log('The result ', result);
             });
         });
     })

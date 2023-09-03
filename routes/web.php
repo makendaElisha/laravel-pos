@@ -28,6 +28,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     Route::get('shop-items/{shop}/products', [ProductController::class, 'getProducts'])->name('products.index');
     Route::resource('products', ProductController::class);
+    Route::get('product/{product}/assign-shop', [ProductController::class, 'assignProducts'])->name('assign.products');
+    Route::post('product/assign-shop', [ProductController::class, 'saveAssignProducts'])->name('save.assign.products');
 
 
     Route::get('/shop/{shop}/products', [ShopController::class, 'index'])->name('shop.products.index');

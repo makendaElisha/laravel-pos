@@ -28,7 +28,12 @@ class HomeController extends Controller
         $orders = Order::with(['items', 'payments'])->get();
         $customers_count = Customer::count();
 
+        $dailySells = Order::sum('total');
+        $dailyBills = count(Order::get());
+
         return view('home', [
+            'dailySells' => $dailySells,
+            'dailyBills' => $dailyBills,
             'orders_count' => $orders->count(),
             'income' => $orders->map(function($i) {
                 if($i->receivedAmount() > $i->total()) {

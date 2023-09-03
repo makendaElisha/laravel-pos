@@ -13,8 +13,13 @@ class Shop extends Model
 {
     use HasFactory;
 
+    public const VILLE = 'ville';
+    public const KOLWEZI = 'kolwezi';
+    public const KILWA = 'kilwa';
+
     protected $fillable = [
         'name',
+        'display',
         'address',
         'slug',
     ];

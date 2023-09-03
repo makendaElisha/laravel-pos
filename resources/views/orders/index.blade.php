@@ -3,7 +3,9 @@
 @section('title', 'Factures')
 @section('content-header', 'List Des Factures')
 @section('content-actions')
-    {{-- <a href="{{route('cart.index')}}" class="btn btn-primary">Open POS</a> --}}
+{{-- <a href="{{route('shop.cart.index', $shop->id)}}" class="btn btn-success">
+    <i class="fas fa-cart-plus pr-1"></i>Facturation
+</a> --}}
 @endsection
 
 @section('content')

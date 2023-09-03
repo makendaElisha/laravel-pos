@@ -19,6 +19,10 @@
             </div>
         </div>
 
+        @php
+            $user = Auth::user();
+        @endphp
+
         <!-- Sidebar Menu -->
         <nav class="mt-2">
             <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
@@ -28,26 +32,40 @@
                         <p>Acceuil</p>
                     </a>
                 </li>
-                <li class="nav-item has-treeview">
-                    <a href="{{ route('products.index') }}" class="nav-link {{ activeSegment('products') }}">
-                        <i class="nav-icon fas fa-shopping-basket"></i>
-                        <p>Articles (Depot)</p>
-                    </a>
-                </li>
+                @if ($user->is_admin)
+                    <li class="nav-item has-treeview">
+                        <a href="{{ route('products.index') }}" class="nav-link {{ activeSegment('products') }}">
+                            <i class="nav-icon fas fa-shopping-basket"></i>
+                            <p>Articles (Depot)</p>
+                        </a>
+                    </li>
+                @endif
                 <li class="nav-item has-treeview">
                     <a href="#" class="nav-link {{ activeSegment('shops') }}">
                         <i class="nav-icon fas fa-th-large"></i>
                         <p>Magasins</p>
                     </a>
                     <div class="pl-3">
-                        @foreach (\App\Models\Shop::get() as $shop)
+                        @if ($user->is_admin)
+                            @foreach (\App\Models\Shop::get() as $shop)
+                                <div class="nav-item has-treeview">
+                                    <a href="{{ route('shop.products.index', $shop->id) }}" class="nav-link {{ activeSegment("shop") }}">
+                                        <i class="nav-icon fas fa-home"></i>
+                                        <p>{{ $shop->name }}</p>
+                                    </a>
+                                </div>
+                            @endforeach
+                        @else
                             <div class="nav-item has-treeview">
-                                <a href="{{ route('shop.products.index', $shop->id) }}" class="nav-link {{ activeSegment("shop") }}">
+                                @php
+                                    $currentShop = \App\Models\Shop::where('name', $user->shop_name)->first();
+                                @endphp
+                                <a href="{{ route('shop.products.index', $currentShop->id) }}" class="nav-link {{ activeSegment("shop") }}">
                                     <i class="nav-icon fas fa-home"></i>
-                                    <p>{{ $shop->name }}</p>
+                                    <p>{{ $currentShop->name }}</p>
                                 </a>
                             </div>
-                        @endforeach
+                        @endif
                     </div>
                 </li>
                 {{-- <li class="nav-item has-treeview">
@@ -61,25 +79,27 @@
                         <i class="nav-icon fas fa-cart-plus"></i>
                         <p>Factures</p>
                     </a>
-                </li>
+                </li>{{--
                 <li class="nav-item has-treeview">
                     <a href="{{ route('customers.index') }}" class="nav-link {{ activeSegment('customers') }}">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Customers</p>
                     </a>
-                </li>
+                </li> --}}
                 {{-- <li class="nav-item has-treeview">
                     <a href="{{ route('shops.index') }}" class="nav-link {{ activeSegment('shops') }}">
                         <i class="nav-icon fas fa-users"></i>
                         <p>Gestion Mag</p>
                     </a>
                 </li> --}}
-                <li class="nav-item has-treeview">
-                    <a href="{{ route('settings.index') }}" class="nav-link {{ activeSegment('settings') }}">
-                        <i class="nav-icon fas fa-cogs"></i>
-                        <p>Settings</p>
-                    </a>
-                </li>
+                @if ($user->is_admin)
+                    <li class="nav-item has-treeview">
+                        <a href="{{ route('settings.index') }}" class="nav-link {{ activeSegment('settings') }}">
+                            <i class="nav-icon fas fa-cogs"></i>
+                            <p>Settings</p>
+                        </a>
+                    </li>
+                @endif
                 <li class="nav-item">
                     <a href="#" class="nav-link" onclick="document.getElementById('logout-form').submit()">
                         <i class="nav-icon fas fa-sign-out-alt"></i>

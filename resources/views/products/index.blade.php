@@ -16,7 +16,7 @@
                 <tr>
                     <th>Code</th>
                     <th>Description</th>
-                    <th>Stock</th>
+                    <th>Stock Dépot</th>
                     <th>Prix</th>
                     <th>Actions</th>
                 </tr>
@@ -31,16 +31,19 @@
                     <td>
                         <a href="{{ route('products.edit', $product) }}" class="btn btn-primary"><i
                                 class="fas fa-edit"></i></a>
-                        <button class="btn btn-danger btn-delete" data-url="{{route('products.destroy', $product)}}"><i
+                        <a href="{{ route('assign.products', $product) }}" class="btn btn-success"><i
+                                class="fas fa-truck"></i></a>
+                        <button class="ml-5 btn btn-danger btn-delete" data-url="{{route('products.destroy', $product)}}"><i
                                 class="fas fa-trash"></i></button>
-                        <button class="btn btn-success btn-seccess"
+                        {{-- <button class="btn btn-success btn-seccess"
                                 data-toggle="modal"
                                 data-target="#myModal"
                                 data-item-id="{{ $product->id }}"
                                 data-item-code="{{ $product->id }}"
+                                data-item-quantity="{{ $product->quantity }}"
                             >
                             <i class="fas fa-truck"></i>
-                        </button>
+                        </button> --}}
                     </td>
                 </tr>
                 @endforeach
@@ -55,30 +58,41 @@
             <div class="modal-content">
                 <div class="modal-header justify-content-center">
                     <h5 class="modal-title text-bold" id="exampleModalLabel">Article ( <span id="modalItemId"></span> ) vers Magasins</h5>
+                    <div data-dismiss="modal" class="justify-content-end pl-4">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+                <div class="modal-header">
+                    <div class="justify-content-center">
+                        <h5 class="modal-title" id="exampleModalLabel">
+                            Stock Depot: <strong id="modalQuantity" class="pr-2"></strong><small>Cartons</small>
+                        </h5>
+                    </div>
                 </div>
                 <div class="modal-body">
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Magasin</th>
-                                <th>Stock</th>
-                                <th>Action</th>
+                                <th>Stock Magsin</th>
+                                <th>Qte á Ajouter</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($shops as $shop)
                                 <tr>
                                     <td>{{ $shop->name }}</td>
-                                    <td>{{ $shop->id }}</td>
-                                    <td id="stock-quantity-{{ $shop->id }}"></td>
-                                    <td id="action-button-{{ $shop->id }}"></td>
+                                    <td id="product-{{ $product->id}}-shop-{{ $shop->id }}-quantity"></td>
+                                    <td id="action-button-{{ $shop->id }}">
+                                        <input id="product-{{ $product->id}}-shop-{{ $shop->id }}-increase" type="number"></input>
+                                    </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
                 </div>
                 <div class="modal-footer justify-content-center">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-success">Valider</button>
                 </div>
             </div>
         </div>
@@ -128,40 +142,34 @@
             var button = $(event.relatedTarget); // Button that triggered the modal
             var itemId = button.data('item-id'); // Extract data-id attribute from button
             var itemCode = button.data('item-code'); // Extract data-code attribute from button
+            var itemQuantity = button.data('item-quantity'); // Extract data-code attribute from button
+
+            // set shops quanities
+            // $.post(`/api/create-product-shop/${shop.id}/product/${itemId}`, {_token: '{{csrf_token()}}'}, function (res) {
+            //     if (res.product) {
+            //         $('#action-button-' + shop.id).remove();
+            //         // $('#action-button-' + shop.id).replaceWith(deleteButton);
+            //     }
+            // })
+
+            // set Store quantity
+
 
             console.log('RES ', itemId, itemCode);
 
             $(this).find('#modalItemId').text(itemCode);
+            $(this).find('#modalQuantity').text(itemQuantity);
 
             $shops.forEach(shop => {
-                var createButton = $('<button>', {
-                    class: 'btn btn-success',
-                    text: 'Créer',
-                    click: function() {
-                        $.post(`/api/create-product-shop/${shop.id}/product/${itemId}`, {_token: '{{csrf_token()}}'}, function (res) {
-                            if (res.product) {
-                                $('#action-button-' + shop.id).remove();
-                                // $('#action-button-' + shop.id).replaceWith(deleteButton);
-                            }
-                        })
+                $.get(`/api/get-quantity/shop/${shop.id}/product/${itemId}`, {_token: '{{csrf_token()}}'}, function (res) {
+                    if (res.product) {
+                        console.log('RESS ', res.product.quantity);
+                        console.log('RESS ', shop.id);
+                        console.log('RESS ', itemId);
+                        // $(`#product-1-shop-1-quantity`).text(777);
+                        $('#product-' + itemId + '-shop-' + shop.id + '-quantity').text(777);
                     }
-                });
-                var deleteButton = $('<button>', {
-                    class: 'btn btn-danger',
-                    text: 'Supprimer',
-                    click: function() {
-                        alert('Delete clicked for shop with ID: ' + shop.id);
-                    }
-                });
-
-                //Show action button
-                $('#action-button-' + shop.id).append(createButton);
-
-                //Get quantities
-                $.get(`/api/get-quantity/shop/${shop.id}/product/${itemId}`, function(result, state) {
-                    console.log('The result ', result);
-                });
-
+                })
             });
         });
     })

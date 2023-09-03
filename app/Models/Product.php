@@ -24,4 +24,17 @@ class Product extends Model
     {
         return $this->belongsTo(ShopProduct::class);
     }
+
+    public function productInShop($productId, $shopId)
+    {
+        $res = ShopProduct::where('shop_id', $shopId)
+            ->where('product_id', $productId)
+            ->first();
+
+        \Log::info('ID: ');
+        \Log::info($res->id ?? 0);
+
+        return $res;
+    }
+
 }

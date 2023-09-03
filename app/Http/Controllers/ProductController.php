@@ -9,9 +9,11 @@ use App\Models\Product;
 use App\Models\Shop;
 use App\Models\ShopProduct;
 use App\Models\StockMouvement;
+use App\Models\TransferShopProduct;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
 
 class ProductController extends Controller
 {
@@ -34,7 +36,6 @@ class ProductController extends Controller
             return ProductResource::collection($products);
         }
 
-        // dd($shopProducts);
         return view('products.index')
             ->with('products', $products)
             ->with('shops', $shops)
@@ -61,6 +62,64 @@ class ProductController extends Controller
         return response()->json([
             'products' => $products,
         ], 200);
+    }
+
+    public function assignProducts(Product $product)
+    {
+        $shops = Shop::get();
+
+        foreach ($shops as $shop) {
+            $item = ShopProduct::where('shop_id', $shop->id)
+                ->where('product_id', $product->id)
+                ->first();
+
+            if ($item) {
+                $shop->quantity = $item->quantity;
+            }
+        }
+
+        return view('products.assign')
+            ->with('product', $product)
+            ->with('shops', $shops);
+    }
+
+    public function saveAssignProducts(Request $request)
+    {
+        $productId = $request->product_id;
+        $shops = $request->shops;
+        $quantities = $request->quantity;
+        $product = Product::find($productId);
+        $isQuantityError = false;
+        $totalQty = 0;
+
+        foreach ($quantities as $qty) {
+            $totalQty += $qty;
+        }
+
+        if ($totalQty > $product->quantity) {
+            $validator = Validator::make([], []);
+            $validator->errors()->add('quantity_exceded', 'This is the error message');
+
+            throw new \Illuminate\Validation\ValidationException($validator);
+        }
+
+        foreach ($quantities as $key => $qty) {
+            $transProd = TransferShopProduct::firstOrCreate([
+                'product_id' => $productId,
+                'shop_id' => $shops[$key],
+            ]);
+
+            $transProd->quantity = ($transProd->quantity ?? 0) + $qty;
+            $transProd->save();
+
+            $product->quantity -= $qty;
+            $product->save();
+        }
+
+        return redirect()->route('assign.products', $product)
+            ->with('success', 'Succes, articles envoyés avec succes.')
+            ->with('product', $product)
+            ->with('shops', Shop::get());
     }
 
     /**
@@ -90,6 +149,14 @@ class ProductController extends Controller
             'quantity' => $request->quantity,
             'items_in_box' => $request->items_in_box,
         ]);
+
+        foreach (Shop::get() as $key => $shop) {
+            $transProd = ShopProduct::firstOrCreate([
+                'product_id' => $product->id,
+                'shop_id' => $shop->id,
+                'quantity' => 0,
+            ]);
+        }
 
         //Log mouvement
         if ($product->quantity) {
