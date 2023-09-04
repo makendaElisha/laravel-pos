@@ -82,9 +82,9 @@
                             @foreach($shops as $shop)
                                 <tr>
                                     <td>{{ $shop->name }}</td>
-                                    <td id="product-{{ $product->id}}-shop-{{ $shop->id }}-quantity"></td>
+                                    <td id="product-{{ $product->id ?? ''}}-shop-{{ $shop->id }}-quantity"></td>
                                     <td id="action-button-{{ $shop->id }}">
-                                        <input id="product-{{ $product->id}}-shop-{{ $shop->id }}-increase" type="number"></input>
+                                        <input id="product-{{ $product->id ?? ''}}-shop-{{ $shop->id }}-increase" type="number"></input>
                                     </td>
                                 </tr>
                             @endforeach
