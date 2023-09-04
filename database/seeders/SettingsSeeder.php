@@ -16,7 +16,7 @@ class SettingsSeeder extends Seeder
     {
         $data = [
             ['key' => 'app_name', 'value' => '3emeAdam-POS'],
-            ['key' => 'currency_symbol', 'value' => '$'],
+            ['key' => 'currency_symbol', 'value' => 'FC'],
         ];
 
         foreach ($data as $value) {
