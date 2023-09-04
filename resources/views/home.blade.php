@@ -24,7 +24,7 @@
             <div class="small-box bg-danger">
               <div class="inner">
                 {{-- <h3>{{config('settings.currency_symbol')}} {{number_format($income_today, 2)}}</h3> --}}
-                <h3>12</h3>
+                <h3>0</h3>
 
                 <p>Article á Faible Stock</p>
               </div>
