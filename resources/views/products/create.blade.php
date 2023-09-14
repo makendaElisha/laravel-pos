@@ -67,35 +67,54 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="items_in_box">Nombre de Piece par Carton</label>
-                <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
-                    id="items_in_box" placeholder="items_in_box" value="{{ old('items_in_box', 1) }}">
-                @error('items_in_box')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+            <div class="form-row mt-2">
+                <div class="form-group col-md-6">
+                    <label for="quantity_pce">Nombre de Pieces (Stock á jour)</label>
+                    <input type="text" name="quantity_pce" class="form-control @error('quantity_pce') is-invalid @enderror"
+                        id="quantity_pce" placeholder="EX. 100" value="{{ old('quantity_pce') }}">
+                    @error('quantity_pce')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+
+                <div class="form-group col-md-6">
+                    <label for="quantity_box">Nombre de Cartons (Stock á jour)</label>
+                    <input type="text" name="quantity_box" class="form-control @error('quantity_box') is-invalid @enderror"
+                        id="quantity_box" placeholder="EX. 10" value="{{ old('quantity_box') }}">
+                    @error('quantity_box')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
             </div>
-            <div class="form-group">
-                <label for="quantity">Stock Initial (Carton)</label>
-                <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
-                    id="quantity" placeholder="Quantity" value="{{ old('quantity') }}">
-                @error('quantity')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+
+            <div class="form-row mt-2">
+                <div class="form-group col-md-6">
+                    <label for="items_in_box">Combien de piece par carton?</label>
+                    <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
+                        id="items_in_box" placeholder="Ex. 12" value="{{ old('items_in_box') }}">
+                    @error('items_in_box')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
             </div>
-            <div class="form-group">
-                <label for="min_quantity">Stock Minimum (Faible stock)</label>
-                <input type="text" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"
-                    id="min_quantity" placeholder="min quantity" value="{{ old('min_quantity') }}">
-                @error('min_quantity')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+
+            <div class="form-row mt-2">
+                <div class="form-group col-md-6">
+                    <label for="min_quantity">Stock Minimal des pieces (Faible stock)</label>
+                    <input type="text" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"
+                        id="min_quantity" placeholder="Ex. 15" value="{{ old('min_quantity') }}">
+                    @error('min_quantity')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
             </div>
             <button class="btn btn-primary" type="submit">Créer</button>
         </form>

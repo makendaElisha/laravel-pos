@@ -68,12 +68,13 @@ class ProductController extends Controller
         $shops = Shop::get();
 
         foreach ($shops as $shop) {
-            $item = ShopProduct::where('shop_id', $shop->id)
+            $item = ShopProduct::with('product')->where('shop_id', $shop->id)
                 ->where('product_id', $product->id)
                 ->first();
 
             if ($item) {
                 $shop->quantity = $item->quantity;
+                $shop->product = $item->product;
             }
         }
 
@@ -139,13 +140,16 @@ class ProductController extends Controller
      */
     public function store(ProductStoreRequest $request)
     {
+        // get quanitity
+        $quantity = ($request->quantity_box * $request->items_in_box) + ($request->quantity_pce);
+
         $product = Product::create([
             'name' => $request->name,
             'description' => $request->description,
             'code' => $request->code,
             'buy_price' => $request->buy_price,
             'sell_price' => $request->sell_price,
-            'quantity' => $request->quantity,
+            'quantity' => $quantity,
             'items_in_box' => $request->items_in_box,
         ]);
 
@@ -193,6 +197,14 @@ class ProductController extends Controller
      */
     public function edit(Product $product)
     {
+        // get quanitity
+        $product->quantity_box = 0;
+        $product->quantity_pce = $product->quantity;
+
+        if ($product->items_in_box && $product->items_in_box > 0) {
+            $product->quantity_box = round ($product->quantity / $product->items_in_box);
+            $product->quantity_pce = $product->quantity % $product->items_in_box;
+        }
         return view('products.edit')->with('product', $product);
     }
 
@@ -205,7 +217,11 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
     {
         $hasQuantityChanged = false;
-        if ($product->quantity != $request->quantity) {
+
+        // get quanitity
+        $quantity = ($request->quantity_box * $request->items_in_box) + ($request->quantity_pce);
+
+        if ($product->quantity != $quantity) {
             $hasQuantityChanged = true;
         }
 
@@ -215,7 +231,7 @@ class ProductController extends Controller
         $product->buy_price = $request->buy_price;
         $product->sell_price = $request->sell_price;
         $product->items_in_box = $request->items_in_box;
-        $product->quantity = $request->quantity;
+        $product->quantity = $quantity;
 
         if (!$product->save()) {
             return redirect()->back()->with('error', 'Desolé, une erreur c\'est produite.');

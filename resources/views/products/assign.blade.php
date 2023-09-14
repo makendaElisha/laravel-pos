@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Envoie Magasin')
-@section('content-header', 'Approvisionez Magasin')
+@section('content-header', "Approvisionez Magasin : $product->name")
 
 @section('content')
 
@@ -9,8 +9,11 @@
     <div class="card-body">
 
         <div class="mb-5">
+            @php
+                $stock = (floor($product->quantity / $product->items_in_box)) . ' CRT Et ' . ($product->quantity % $product->items_in_box) . ' PCE';
+            @endphp
             <h4>
-                <u>Quantité au depot: <strong>{{ $product->quantity }}<em class="pl-1 h6">Cartons</em></strong></u>
+                <u>Quantité au depot: <strong>{{ $stock }}</strong></u>
             </h4>
         </div>
 
@@ -23,14 +26,17 @@
                     <tr>
                         <th>Magasin</th>
                         <th>Stock present au Magasin</th>
-                        <th>Quantité á Ajouter</th>
+                        <th>Quantité á Ajouter (Pieces)</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($shops as $shop)
+                        @php
+                            $stockShop = (floor($shop->quantity / $shop->product->items_in_box)) . ' CRT Et ' . ($shop->quantity % $shop->product->items_in_box) . ' PCE';
+                        @endphp
                         <tr>
                             <td>{{ $shop->name }}</td>
-                            <td>{{ $shop->quantity }}<span class="pl-1" style="font-size: 12px;"><i>CRT</i></span></td>
+                            <td>{{ $stockShop }}<span class="pl-1" style="font-size: 12px;"></span></td>
                             <td id="action-button-{{ $shop->id }}">
                                 <input name="quantity[]" type="number">
                                 <input type="hidden" name="shops[]" value="{{ $shop->id }}">

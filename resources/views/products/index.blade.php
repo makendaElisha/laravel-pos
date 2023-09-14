@@ -39,7 +39,7 @@
             <tbody>
                 @foreach ($products as $product)
                 @php
-                    $stock = (posprice($product->quantity / $product->items_in_box)) . ' CRT Et ' . (posprice($product->quantity % $product->items_in_box)) . ' PCE';
+                    $stock = (floor($product->quantity / $product->items_in_box)) . ' CRT Et ' . (floor($product->quantity % $product->items_in_box)) . ' PCE';
                 @endphp
                 <tr>
                     <td>{{$product->code}}</td>
@@ -54,14 +54,14 @@
                                 class="fas fa-edit"></i></a>
                         <a href="{{ route('assign.products', $product) }}" class="btn btn-success"><i
                                 class="fas fa-truck"></i></a>
-                        <button class="ml-1 btn btn-primary"
+                        {{-- <button class="ml-1 btn btn-primary"
                             data-toggle="modal"
                             data-target="#updateStock"
                             data-product="{{ $product }}"
                             data-toggle="tooltip" data-placement="bottom" title="Ajouter au stock"
                         >
                             <i class="fas fa-plus"></i>
-                        </button>
+                        </button> --}}
                         <button class="ml-5 btn btn-danger btn-delete" data-url="{{route('products.destroy', $product)}}"><i
                                 class="fas fa-trash"></i></button>
                         {{-- <button class="btn btn-success btn-seccess"

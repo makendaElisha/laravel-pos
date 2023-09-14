@@ -45,7 +45,8 @@
             <tbody>
                 @foreach ($products as $shopProd)
                 @php
-                    $stock = (posprice($shopProd->quantity / $shopProd->product->items_in_box)) . ' CRT Et ' . (posprice($shopProd->quantity % $shopProd->product->items_in_box)) . ' PCE';
+                // dump($shopProd);
+                    $stock = (floor($shopProd->quantity / $shopProd->product->items_in_box)) . ' CRT Et ' . (floor($shopProd->quantity % $shopProd->product->items_in_box)) . ' PCE';
                 @endphp
                 <tr>
                     <td>{{$shopProd->product->code}}</td>
@@ -100,7 +101,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <h6>Quantité Envoyée: <u id="articleStock" style="font-size: 1.2rem;" class="pr-1"></u><i>CRT</i></h6>
+                    <h6>Quantité Envoyée: <u id="articleStock" style="font-size: 1.2rem;" class="pr-1"></u><i>Pieces</i></h6>
                     <label for="inputField">Quantité:</label>
                     <input type="number" id="inputField" max="20" class="form-control" placeholder="Entrez la valeur">
                 </div>

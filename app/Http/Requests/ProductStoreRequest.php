@@ -30,7 +30,9 @@ class ProductStoreRequest extends FormRequest
             'code' => 'required|string|max:50|unique:products',
             'buy_price' => 'nullable|numeric',
             'sell_price' => 'required|numeric',
-            'quantity' => 'nullable|integer',
+            'quantity_pce' => 'nullable|integer',
+            'quantity_box' => 'nullable|integer',
+            'min_quantity' => 'nullable|integer',
             'items_in_box' => 'nullable|integer',
         ];
     }
