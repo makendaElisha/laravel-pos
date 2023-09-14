@@ -15,6 +15,9 @@
             <h4>
                 <u>Quantité au depot: <strong>{{ $stock }}</strong></u>
             </h4>
+            <h6>
+                <i>1 Carton = <strong>{{ $product->items_in_box }}</strong> Pieces</i>
+            </h6>
         </div>
 
         <form action="{{ route('save.assign.products') }}" method="POST" enctype="multipart/form-data">

@@ -452,8 +452,8 @@ class Cart extends Component {
                                 style={{ maxWidth: '200px', maxHeight: '160px' }}
                             >
                                 <h5 className="text-center mb-3 font-weight-bold">[{p.product.code}] { p.product.name }</h5>
-                                <div>Stock Mag: {p.quantity}</div>
-                                <div className="blockquote-footer">Pcs/carton: {p.product.items_in_box}</div>
+                                <div>Stock Mag: {p.quantity} <i><small>Pce</small></i></div>
+                                <div className="blockquote-footer">(1 CRT = {p.product.items_in_box} Pce)</div>
                                 <div>Prix/pce: {p.product.sell_price} {window.APP.currency_symbol}</div>
                             </div>
                         ))}

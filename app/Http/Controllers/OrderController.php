@@ -6,6 +6,7 @@ use App\Http\Requests\OrderStoreRequest;
 use App\Models\Order;
 use App\Models\Setting;
 use App\Models\Shop;
+use App\Models\ShopProduct;
 use App\Models\StockMouvement;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -73,6 +74,14 @@ class OrderController extends Controller
                 'quantity' => $item['final_quantity'],
                 'product_id' => $item['product']['id'],
             ]);
+
+            $shopProd = ShopProduct::where('shop_id', $request->shop_id)
+                ->where('product_id', $item['product']['id'])
+                ->first();
+
+            // Deduct form shop
+            $shopProd->quantity -= (int) $item['final_quantity'];
+            $shopProd->save();
 
             //update stock mouvement
             StockMouvement::create([

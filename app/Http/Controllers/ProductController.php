@@ -150,6 +150,7 @@ class ProductController extends Controller
             'buy_price' => $request->buy_price,
             'sell_price' => $request->sell_price,
             'quantity' => $quantity,
+            'min_quantity' => $request->min_quantity,
             'items_in_box' => $request->items_in_box,
         ]);
 
@@ -232,6 +233,7 @@ class ProductController extends Controller
         $product->sell_price = $request->sell_price;
         $product->items_in_box = $request->items_in_box;
         $product->quantity = $quantity;
+        $product->min_quantity = $request->min_quantity;
 
         if (!$product->save()) {
             return redirect()->back()->with('error', 'Desolé, une erreur c\'est produite.');

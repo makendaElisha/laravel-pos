@@ -148,6 +148,7 @@
                     quantity: quantity,
                     user_id: $userId,
                 }, function (res) {
+                    console.log('RRRRR ', res);
                     if (res.product) {
                         location.reload();
                     }
