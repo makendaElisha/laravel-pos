@@ -202,7 +202,7 @@ class ProductController extends Controller
         $product->quantity_pce = $product->quantity;
 
         if ($product->items_in_box && $product->items_in_box > 0) {
-            $product->quantity_box = round ($product->quantity / $product->items_in_box);
+            $product->quantity_box = floor($product->quantity / $product->items_in_box);
             $product->quantity_pce = $product->quantity % $product->items_in_box;
         }
         return view('products.edit')->with('product', $product);
