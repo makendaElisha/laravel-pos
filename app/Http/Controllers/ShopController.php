@@ -16,9 +16,17 @@ class ShopController extends Controller
      */
     public function index(Request $request, Shop $shop)
     {
-        $shopProducts = ShopProduct::with('product')->where('shop_id', $shop->id)
-        ->latest()->paginate(10);
-            // ->get();
+        $search = $request->search;
+        $shopProducts = ShopProduct::with('product')->where('shop_id', $shop->id);
+
+        if ($search) {
+            $shopProducts->whereHas('product', function($q) use($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                    ->orWhere('code', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $shopProducts = $shopProducts->latest()->paginate(10);
         $shops = Shop::get();
 
         foreach ($shopProducts as $key => $shopProd) {
@@ -31,10 +39,6 @@ class ShopController extends Controller
             }
 
         }
-
-        // if ($request->search) {
-        //     $shopProducts = $shopProducts->where('name', 'LIKE', "%{$request->search}%");
-        // }
 
         return view('shopProducts.index')->with([
             'products' => $shopProducts,

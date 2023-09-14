@@ -14,6 +14,7 @@ class Shop extends Model
     use HasFactory;
 
     public const VILLE = 'ville';
+    public const LUBUMBASHI = 'Lubumbashi';
     public const KOLWEZI = 'kolwezi';
     public const KILWA = 'kilwa';
 

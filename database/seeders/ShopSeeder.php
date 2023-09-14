@@ -18,9 +18,9 @@ class ShopSeeder extends Seeder
         DB::table('shops')->truncate();
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
-        // Ville
+        // LUBUMBASHI
         Shop::create([
-            'name' => Shop::VILLE,
+            'name' => Shop::LUBUMBASHI,
             'display' => '',
             'address' => '',
             'slug' => '',

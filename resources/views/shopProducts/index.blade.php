@@ -17,23 +17,44 @@
 @section('content')
 <div class="card product-list">
     <div class="card-body">
+        <div class="row mb-3">
+            <div class="col-md-5">
+                <form action="{{route('shop.products.index', $shop->id)}}">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <input type="text" placeholder="Recherche par code ou nom" name="search" class="form-control" value="{{request('search')}}" />
+                        </div>
+                        <div class="col-md-2">
+                            <button class="btn btn-outline-primary" type="submit">Chercher</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
         <table class="table">
             <thead>
                 <tr>
                     <th>Code</th>
                     <th>Description</th>
                     <th>Stock Magasin</th>
+                    <th>Pieces/Carton</th>
                     <th>Prix</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach ($products as $shopProd)
+                @php
+                    $stock = (posprice($shopProd->quantity / $shopProd->product->items_in_box)) . ' CRT Et ' . (posprice($shopProd->quantity % $shopProd->product->items_in_box)) . ' PCE';
+                @endphp
                 <tr>
                     <td>{{$shopProd->product->code}}</td>
                     <td>{{$shopProd->product->name}}</td>
-                    <td>{{$shopProd->quantity}}</td>
-                    <td>{{$shopProd->product->sell_price}} F.C</td>
+                    <td>
+                        <div>{{$stock}}</div>
+                    </td>
+                    <td>{{$shopProd->product->items_in_box}}</td>
+                    <td>{{posprice($shopProd->product->sell_price)}} F.C</td>
                     <td>
                         @if ($shopProd->transfer_quantity > 0)
                             @if ($user->is_admin)

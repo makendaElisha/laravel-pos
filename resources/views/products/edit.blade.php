@@ -34,7 +34,7 @@
                 @enderror
             </div>
 
-            <div class="form-group">
+            {{-- <div class="form-group">
                 <label for="description">Description</label>
                 <textarea name="description" class="form-control @error('description') is-invalid @enderror"
                     id="description" placeholder="description">{{ old('description', $product->name) }}</textarea>
@@ -43,11 +43,11 @@
                     <strong>{{ $message }}</strong>
                 </span>
                 @enderror
-            </div>
+            </div> --}}
 
-            <div>
-                <div class="form-group">
-                    <label for="sell_price">Prix de Vente</label>
+            <div class="form-row mt-2">
+                <div class="form-group col-md-6">
+                    <label for="sell_price">Prix de Vente (FC)</label>
                     <input type="text" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" id="sell_price"
                         placeholder="Le prix de vente par piece" value="{{ old('sell_price', $product->sell_price) }}">
                     @error('sell_price')
@@ -56,8 +56,8 @@
                     </span>
                     @enderror
                 </div>
-                <div class="form-group">
-                    <label for="buy_price">Prix d'achat</label>
+                <div class="form-group col-md-6">
+                    <label for="buy_price">Prix d'achat (FC)</label>
                     <input type="text" name="buy_price" class="form-control @error('buy_price') is-invalid @enderror" id="buy_price"
                         placeholder="Le prix d'achat par piece" value="{{ old('buy_price', $product->buy_price) }}">
                     @error('buy_price')
@@ -68,26 +68,60 @@
                 </div>
             </div>
 
-            <div class="form-group">
-                <label for="items_in_box">Nombre de Piece par Carton</label>
-                <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
-                    id="items_in_box" placeholder="items_in_box" value="{{ old('items_in_box', $product->items_in_box) }}">
-                @error('items_in_box')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+            <div class="form-row mt-2">
+                {{-- <div class="form-group col-md-5">
+                    <label for="items_in_box">Nombre de Cartons</label>
+                    <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
+                        id="items_in_box" placeholder="items_in_box" value="{{ old('items_in_box', $product->items_in_box) }}">
+                    @error('items_in_box')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div> --}}
+                {{-- <div class="form-group col-md-5">
+                    <label for="items_in_box">Nombre de Pieces</label>
+                    <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
+                        id="items_in_box" placeholder="items_in_box" value="{{ old('items_in_box', $product->items_in_box) }}">
+                    @error('items_in_box')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div> --}}
+                <div class="form-group col-md-6">
+                    <label for="items_in_box">Combien de piece par carton?</label>
+                    <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
+                        id="items_in_box" placeholder="items_in_box" value="{{ old('items_in_box', $product->items_in_box) }}">
+                    @error('items_in_box')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
             </div>
 
-            <div class="form-group">
-                <label for="quantity">Stock á Jour</label>
-                <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
-                    id="quantity" placeholder="Quantity" value="{{ old('quantity', $product->quantity) }}">
-                @error('quantity')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
+            <div class="form-row mt-2">
+                <div class="form-group col-md-6">
+                    <label for="quantity">Stock á Jour</label>
+                    <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
+                        id="quantity" placeholder="Quantity" value="{{ old('quantity', $product->quantity) }}">
+                    @error('quantity')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="min_quantity">Stock Minimum (Faible stock)</label>
+                    <input type="text" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"
+                        id="min_quantity" placeholder="min Quantity" value="{{ old('min_quantity', $product->min_quantity) }}">
+                    @error('min_quantity')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
             </div>
 
             <button class="btn btn-primary" type="submit">Update</button>

@@ -31,11 +31,11 @@ class UserSeeder extends Seeder
 
         // Lubumbashi
         User::create([
-            'first_name' => 'Ville',
+            'first_name' => 'Lubumbashi',
             'last_name' => '',
-            'email'=>'ville@tadam.com',
-            'shop_name' => Shop::VILLE,
-            'password' => bcrypt('ville123')
+            'email'=>'lubumbashi@tadam.com',
+            'shop_name' => Shop::LUBUMBASHI,
+            'password' => bcrypt('lubumbashi123')
         ]);
 
         // Kolwezi

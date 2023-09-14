@@ -44,9 +44,9 @@
                 @enderror
             </div>
 
-            <div>
-                <div class="form-group">
-                    <label for="sell_price">Prix de Vente</label>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="sell_price">Prix de Vente (FC)</label>
                     <input type="text" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" id="sell_price"
                         placeholder="Le prix de vente par piece" value="{{ old('sell_price') }}">
                     @error('sell_price')
@@ -55,8 +55,8 @@
                     </span>
                     @enderror
                 </div>
-                <div class="form-group">
-                    <label for="buy_price">Prix d'achat</label>
+                <div class="form-group col-md-6">
+                    <label for="buy_price">Prix d'achat (FC)</label>
                     <input type="text" name="buy_price" class="form-control @error('buy_price') is-invalid @enderror" id="buy_price"
                         placeholder="Le prix d'achat par piece" value="{{ old('buy_price') }}">
                     @error('buy_price')
@@ -82,6 +82,16 @@
                 <input type="text" name="quantity" class="form-control @error('quantity') is-invalid @enderror"
                     id="quantity" placeholder="Quantity" value="{{ old('quantity') }}">
                 @error('quantity')
+                <span class="invalid-feedback" role="alert">
+                    <strong>{{ $message }}</strong>
+                </span>
+                @enderror
+            </div>
+            <div class="form-group">
+                <label for="min_quantity">Stock Minimum (Faible stock)</label>
+                <input type="text" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"
+                    id="min_quantity" placeholder="min quantity" value="{{ old('min_quantity') }}">
+                @error('min_quantity')
                 <span class="invalid-feedback" role="alert">
                     <strong>{{ $message }}</strong>
                 </span>

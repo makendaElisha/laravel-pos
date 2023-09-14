@@ -3,6 +3,8 @@ import ReactDOM from "react-dom";
 import axios from "axios";
 import Swal from "sweetalert2";
 import { sum } from "lodash";
+// import Slip from "./Slip";
+// import { renderToString } from 'react-dom/server';
 
 class Cart extends Component {
     constructor(props) {
@@ -112,8 +114,12 @@ class Cart extends Component {
     handleChangeQty(product_id, qty) {
         if (!qty) return;
         const cart = this.state.cart.map((c) => {
-            if (c.product_id === product_id && Number(qty) <= Number(c.max_qty)) {
-                c.quantity = Number(qty);
+            if (c.product_id === product_id) {
+                const maxValue = c.unit === 'pce' ? Number(qty) : Number(qty) * c.product.items_in_box
+                if (Number(c.max_qty) >= maxValue) {
+                    c.sell_quantity = Number(qty);
+                    c.final_quantity = maxValue;
+                }
             }
             return c;
         });
@@ -129,9 +135,27 @@ class Cart extends Component {
         //     });
     }
 
+    handleChangeUnit(product_id, unit) {
+        const cart = this.state.cart.map((c) => {
+            if (c.product_id === product_id) {
+                c.unit = unit;
+                c.sell_quantity = 0;
+                c.final_quantity = 0;
+            }
+            return c;
+        });
+
+        this.setState({ cart: [] });
+        this.setState({ cart: cart });
+    }
+
     getTotal(cart) {
-        const total = cart?.map((c) => c.quantity * c.product.sell_price);
-        return sum(total).toFixed(2);
+        const total = cart?.map((c) => c.unit === 'pce' ?
+            c.sell_quantity * c.product.sell_price :
+            c.sell_quantity * c.product.sell_price * c.product.items_in_box
+        );
+
+        return sum(total);
     }
 
     getDiscount(cart) {
@@ -141,7 +165,6 @@ class Cart extends Component {
         if (this.state.discount && this.state.discountPercent && total >= this.state.discount) {
             discountAmount = total * this.state.discountPercent / 100;
         }
-
 
         return discountAmount;
     }
@@ -183,7 +206,7 @@ class Cart extends Component {
                             c.product_id === product.id &&
                             product.quantity > c.quantity
                         ) {
-                            c.quantity = c.quantity + 1;
+                            c.sell_quantity = c.sell_quantity + 1;
                         }
                         return c;
                     }),
@@ -193,9 +216,13 @@ class Cart extends Component {
                     product = {
                         ...product,
                         product_id: product.id,
-                        quantity: 1,
-                        max_qty: product.quantity,
+                        sell_quantity: 1,
+                        final_quantity: 1,
+                        max_qty: Number(product.quantity),
+                        unit: 'pce',
                     };
+
+                    console.log('ADDed ', product);
 
                     this.setState({ cart: [...this.state.cart, product] });
                 }
@@ -256,7 +283,7 @@ class Cart extends Component {
         const { cart, products, customers,customer, code } = this.state;
         return (
             <div className="row">
-                <div className="col-md-6 col-lg-4">
+                <div className="col-md-6">
                     <div className="row mb-2">
                         {/* <div className="col">
                             <form onSubmit={this.handleScanCode}>
@@ -300,20 +327,21 @@ class Cart extends Component {
                             <table className="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Product Name</th>
+                                        <th>Article</th>
                                         <th>Quantity</th>
+                                        <th>Unité</th>
                                         <th className="text-right">Price</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {cart.map((c) => (
                                         <tr key={c.id}>
-                                            <td>{c.product.name}</td>
+                                            <td><b>[code: {c.product.code}]</b> {c.product.name}</td>
                                             <td>
                                                 <input
                                                     type="text"
-                                                    className="form-control form-control-sm qty mr-1"
-                                                    value={c.quantity}
+                                                    className="form-control form-control-sm w-50 qty mr-1"
+                                                    value={c.sell_quantity}
                                                     onChange={(event) =>
                                                         this.handleChangeQty(
                                                             c.product_id,
@@ -332,11 +360,28 @@ class Cart extends Component {
                                                     <i className="fas fa-trash"></i>
                                                 </button>
                                             </td>
+                                            <td>
+                                                <select
+                                                    className="mt-1"
+                                                    value={c.unit}
+                                                    onChange={(event) =>
+                                                        this.handleChangeUnit(
+                                                            c.product_id,
+                                                            event.target.value
+                                                        )
+                                                    }
+                                                >
+                                                    <option value="pce">Piece</option>
+                                                    {(c.quantity >= c.product.items_in_box) && <option value="crt">Carton</option>}
+                                                </select>
+                                            </td>
                                             <td className="text-right">
-                                                {window.APP.currency_symbol}{" "}
-                                                {(
-                                                    c.product.sell_price * c.quantity
-                                                ).toFixed(2)}
+                                                { c.unit === 'pce'
+                                                    ? c.product.sell_price * c.sell_quantity
+                                                    : c.product.sell_price * c.sell_quantity * c.product.items_in_box
+                                                }
+                                                {" "}
+                                                {window.APP.currency_symbol}
                                             </td>
                                         </tr>
                                     ))}
@@ -350,17 +395,17 @@ class Cart extends Component {
                             <tr className="text-right">
                                 <td></td>
                                 <td>Total:</td>
-                                <td className="text-left pl-2">{window.APP.currency_symbol} {this.getTotal(cart)}</td>
+                                <td className="text-left pl-2">{this.getTotal(cart)} {window.APP.currency_symbol}</td>
                             </tr>
                             <tr className="text-right">
                                 <td></td>
                                 <td>Reduction:</td>
-                                <td className="text-left pl-2">{window.APP.currency_symbol} {this.getDiscount(cart)}</td>
+                                <td className="text-left pl-2">{this.getDiscount(cart)} {window.APP.currency_symbol}</td>
                             </tr>
                             <tr className="text-right">
                                 <td></td>
                                 <td>Montant á Payer:</td>
-                                <td className="text-left pl-2">{window.APP.currency_symbol} {this.getTotalToPay(cart)}</td>
+                                <td className="text-left pl-2">{this.getTotalToPay(cart)} {window.APP.currency_symbol}</td>
                             </tr>
                         </table>
                     </div>
@@ -388,7 +433,7 @@ class Cart extends Component {
                         </div>
                     </div>
                 </div>
-                <div className="col-md-6 col-lg-8">
+                <div className="col-md-6">
                     <div className="mb-2">
                         <input
                             type="text"
@@ -406,9 +451,10 @@ class Cart extends Component {
                                 className="item p-3 w-100 h-100"
                                 style={{ maxWidth: '200px', maxHeight: '160px' }}
                             >
-                                <h5 className="text-center mb-3 font-weight-bold">{ p.product.name }</h5>
+                                <h5 className="text-center mb-3 font-weight-bold">[{p.product.code}] { p.product.name }</h5>
                                 <div>Stock Mag: {p.quantity}</div>
                                 <div className="blockquote-footer">Pcs/carton: {p.product.items_in_box}</div>
+                                <div>Prix/pce: {p.product.sell_price} {window.APP.currency_symbol}</div>
                             </div>
                         ))}
                     </div>

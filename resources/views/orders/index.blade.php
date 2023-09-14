@@ -11,15 +11,23 @@
 @section('content')
 <div class="card">
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-7"></div>
-            <div class="col-md-5">
+        <div class="row mb-3">
+            <div class="col-md-5"></div>
+            <div class="col-md-7">
                 <form action="{{route('orders.index')}}">
                     <div class="row">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
+                            <select @if(!$user->is_admin) disabled @endif name="shop" id="" class="form-control">
+                                <option value="0" @if($shopId == '0') selected @endif>Tous Les Magasins</option>
+                                @foreach ($shops as $shop)
+                                    <option value="{{ $shop->id }}" @if($shopId == $shop->id) selected @endif>{{ $shop->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-md-3">
                             <input type="date" name="start_date" class="form-control" value="{{request('start_date')}}" />
                         </div>
-                        <div class="col-md-5">
+                        <div class="col-md-3">
                             <input type="date" name="end_date" class="form-control" value="{{request('end_date')}}" />
                         </div>
                         <div class="col-md-2">
@@ -32,7 +40,7 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Num Facture</th>
+                    <th>Numero Facture</th>
                     <th>Client</th>
                     <th>Total</th>
                     <th>Crée par</th>
@@ -44,7 +52,7 @@
                 <tr>
                     <td>{{$order->order_number}}</td>
                     <td>{{$order->customer}}</td>
-                    <td>{{ config('settings.currency_symbol') }} {{$order->paid}}</td>
+                    <td>{{ number_format($order->paid, 0, ',', '.') }} {{ config('settings.currency_symbol') }}</td>
                     <td>{{$order->user->first_name}}</td>
                     <td>{{$order->created_at}}</td>
                 </tr>
@@ -52,8 +60,9 @@
             </tbody>
             <tfoot>
                 <tr>
+                    <th>Total</th>
                     <th></th>
-                    <th>{{ config('settings.currency_symbol') }} {{ number_format($total, 2) }}</th>
+                    <th>{{ number_format($total, 0, ',', '.') }} {{ config('settings.currency_symbol') }} </th>
                     <th></th>
                     <th></th>
                 </tr>

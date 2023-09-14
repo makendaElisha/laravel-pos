@@ -13,6 +13,7 @@ class Product extends Model
         'buy_price',
         'sell_price',
         'quantity',
+        'min_quantity',
         'items_in_box',
     ];
 
