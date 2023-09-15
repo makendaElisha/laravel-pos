@@ -47,7 +47,7 @@
             <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="sell_price">Prix de Vente (FC)</label>
-                    <input type="text" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" id="sell_price"
+                    <input type="number" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" id="sell_price"
                         placeholder="Le prix de vente par piece" value="{{ old('sell_price') }}">
                     @error('sell_price')
                     <span class="invalid-feedback" role="alert">
@@ -57,7 +57,7 @@
                 </div>
                 <div class="form-group col-md-6">
                     <label for="buy_price">Prix d'achat (FC)</label>
-                    <input type="text" name="buy_price" class="form-control @error('buy_price') is-invalid @enderror" id="buy_price"
+                    <input type="number" name="buy_price" class="form-control @error('buy_price') is-invalid @enderror" id="buy_price"
                         placeholder="Le prix d'achat par piece" value="{{ old('buy_price') }}">
                     @error('buy_price')
                     <span class="invalid-feedback" role="alert">
@@ -70,7 +70,7 @@
             <div class="form-row mt-2">
                 <div class="form-group col-md-6">
                     <label for="quantity_pce">Nombre de Pieces (Stock á jour)</label>
-                    <input type="text" name="quantity_pce" class="form-control @error('quantity_pce') is-invalid @enderror"
+                    <input type="number" name="quantity_pce" class="form-control @error('quantity_pce') is-invalid @enderror"
                         id="quantity_pce" placeholder="EX. 100" value="{{ old('quantity_pce') }}">
                     @error('quantity_pce')
                     <span class="invalid-feedback" role="alert">
@@ -81,7 +81,7 @@
 
                 <div class="form-group col-md-6">
                     <label for="quantity_box">Nombre de Cartons (Stock á jour)</label>
-                    <input type="text" name="quantity_box" class="form-control @error('quantity_box') is-invalid @enderror"
+                    <input type="number" name="quantity_box" class="form-control @error('quantity_box') is-invalid @enderror"
                         id="quantity_box" placeholder="EX. 10" value="{{ old('quantity_box') }}">
                     @error('quantity_box')
                     <span class="invalid-feedback" role="alert">
@@ -94,8 +94,8 @@
             <div class="form-row mt-2">
                 <div class="form-group col-md-6">
                     <label for="items_in_box">Combien de piece par carton?</label>
-                    <input type="text" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
-                        id="items_in_box" placeholder="Ex. 12" value="{{ old('items_in_box') }}">
+                    <input type="number" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
+                        id="items_in_box" placeholder="Ex. 12" value="{{ old('items_in_box', 1) }}">
                     @error('items_in_box')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>
@@ -107,8 +107,8 @@
             <div class="form-row mt-2">
                 <div class="form-group col-md-6">
                     <label for="min_quantity">Stock Minimal des pieces (Faible stock)</label>
-                    <input type="text" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"
-                        id="min_quantity" placeholder="Ex. 15" value="{{ old('min_quantity') }}">
+                    <input type="number" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"
+                        id="min_quantity" placeholder="Ex. 15" value="{{ old('min_quantity', 1) }}">
                     @error('min_quantity')
                     <span class="invalid-feedback" role="alert">
                         <strong>{{ $message }}</strong>

@@ -33,7 +33,7 @@ class ProductStoreRequest extends FormRequest
             'quantity_pce' => 'nullable|integer',
             'quantity_box' => 'nullable|integer',
             'min_quantity' => 'nullable|integer',
-            'items_in_box' => 'nullable|integer',
+            'items_in_box' => 'required|integer|min:1',
         ];
     }
 }

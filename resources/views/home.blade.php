@@ -5,9 +5,13 @@
 @section('content')
 <div class="container-fluid">
     <div class="row">
-        <div class="col-lg-3 col-6">
+        <div class="col-lg-4 col-6">
             <!-- small box -->
-            <div class="small-box bg-info" data-toggle="modal" data-target="#allDailySales">
+            @if ($user->is_admin)
+                <div class="small-box bg-info" data-toggle="modal" data-target="#allDailySales">
+            @else
+                <div class="small-box bg-info">
+            @endif
                 <div class="inner">
                     <h3>{{ $dailySells }} F.C</h3>
                     <p>Ventes Journalieres</p>
@@ -22,7 +26,7 @@
 
         @if ($user->is_admin)
             <!-- ./col -->
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-4 col-6">
                 <!-- small box -->
                 <div class="small-box bg-danger" data-toggle="modal" data-target="#allLowStock">
                     <div class="inner">
@@ -39,7 +43,7 @@
                 </div>
             </div>
             <!-- ./col -->
-            <div class="col-lg-3 col-6">
+            <div class="col-lg-4 col-6">
                 <!-- small box -->
                 <div class="small-box bg-warning">
                     <div class="inner">
@@ -55,6 +59,24 @@
                 </div>
             </div>
             <!-- ./col -->
+        @else
+        <div class="col-lg-4 col-6">
+            <!-- small box -->
+            <div class="small-box bg-danger" data-toggle="modal" data-target="#allLowStock">
+                <div class="inner">
+                    {{-- <h3>{{config('settings.currency_symbol')}} {{number_format($income_today, 2)}}</h3> --}}
+                    <h3>{{ count($lowStockProducts) }}</h3>
+
+                    <p>Article á Faible Stock</p>
+                </div>
+                <div class="icon">
+                    <i class="ion ion-pie-graph"></i>
+                </div>
+                {{-- <a href="{{route('orders.index')}}" class="small-box-footer">More info <i
+                        class="fas fa-arrow-circle-right"></i></a> --}}
+            </div>
+        </div>
+
         @endif
     </div>
     <div class="modal fade" id="allDailySales" tabindex="-1" role="dialog" aria-labelledby="updateStockLabel"
@@ -111,7 +133,9 @@
                             <tr>
                                 <th>Code</th>
                                 <th>Nom</th>
-                                <th>Modifier</th>
+                                @if ($user->is_admin)
+                                    <th>Modifier</th>
+                                @endif
                             </tr>
                         </thead>
                         <tbody>
@@ -119,10 +143,13 @@
                             <tr>
                                 <td>{{$product->code}}</td>
                                 <td>{{$product->name}}</td>
-                                <td>
-                                    <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary"><i
-                                            class="fas fa-edit"></i></a>
-                                </td>
+                                @if ($user->is_admin)
+                                    <td>
+                                        <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary"><i
+                                                class="fas fa-edit"></i></a>
+                                    </td>
+                                @endif
+
                             </tr>
                             @endforeach
                         </tbody>

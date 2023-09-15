@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Shop;
+use App\Models\ShopProduct;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -37,12 +38,6 @@ class HomeController extends Controller
 
         $dailySells = Order::sum('total');
 
-
-        if (!$user->is_admin) {
-            $id = Shop::where('name', $user->shop_name)->first();
-            $dailySells = Order::where('shop_id', $id)->sum('total');
-        }
-
         $allDailySales = [
             Shop::LUBUMBASHI => $lushi ? Order::where('shop_id', $lushi->id)->sum('total') : '',
             Shop::KILWA => $kolwezi ? Order::where('shop_id', $kilwa->id)->sum('total') : '',
@@ -50,6 +45,21 @@ class HomeController extends Controller
         ];
 
         $lowStockProducts = Product::whereColumn('quantity', '<', 'min_quantity')->get();
+
+        if (!$user->is_admin) {
+            $currShop = Shop::where('name', $user->shop_name)->first();
+            $dailySells = Order::where('shop_id', $currShop->id)->sum('total');
+
+            $ids = [];
+            $shpProds = ShopProduct::with('product')->where('shop_id', $currShop->id)->get();
+            foreach ($shpProds as $prodItem) {
+                if ($prodItem->quantity < $prodItem->product->min_quantity) {
+                    $ids[] = $prodItem->product_id;
+                }
+            }
+
+            $lowStockProducts = Product::whereIn('id', $ids)->get();
+        }
 
         $dailyBills = count(Order::get());
 
