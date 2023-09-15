@@ -46,6 +46,7 @@ class HomeController extends Controller
 
         $lowStockProducts = Product::whereColumn('quantity', '<', 'min_quantity')->get();
 
+        $allShopSales = 0;
         if (!$user->is_admin) {
             $currShop = Shop::where('name', $user->shop_name)->first();
             $dailySells = Order::where('shop_id', $currShop->id)->sum('total');
@@ -59,6 +60,7 @@ class HomeController extends Controller
             }
 
             $lowStockProducts = Product::whereIn('id', $ids)->get();
+            $allShopSales = Order::where('shop_id', $currShop->id)->sum('total');
         }
 
         $dailyBills = count(Order::get());
@@ -66,6 +68,7 @@ class HomeController extends Controller
         return view('home', [
             'user' => $user,
             'dailySells' => $dailySells,
+            'allShopSales' => $allShopSales,
             'allDailySales' => $allDailySales,
             'dailyBills' => $dailyBills,
             'orders_count' => $orders->count(),

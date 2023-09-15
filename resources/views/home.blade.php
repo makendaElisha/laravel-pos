@@ -13,7 +13,11 @@
                 <div class="small-box bg-info">
             @endif
                 <div class="inner">
-                    <h3>{{ $dailySells }} F.C</h3>
+                    @if ($user->is_admin)
+                        <h3>{{ $dailySells }} F.C</h3>
+                    @else
+                        <h3>{{ $allShopSales }} F.C</h3>
+                    @endif
                     <p>Ventes Journalieres</p>
                 </div>
                 <div class="icon">
