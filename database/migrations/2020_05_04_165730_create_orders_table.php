@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('discount');
             $table->decimal('paid');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('shop_id')->references('id')->on('shops')->onDelete('set null');

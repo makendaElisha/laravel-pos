@@ -26,8 +26,13 @@ class ProductController extends Controller
     {
         $products = new Product();
         if ($request->search) {
-            $products = $products->where('name', 'LIKE', "%{$request->search}%")
-                ->orWhere('code', 'LIKE', "%{$request->search}%");
+
+            // check if is code
+            if ((int)$request->search == $request->search) {
+                $products = $products->where('code', '=', $request->search);
+            } else {
+                $products = $products->where('name', 'LIKE', "%{$request->search}%");
+            }
         }
         $products = $products->paginate(10);
         $shops = Shop::get();
@@ -51,8 +56,12 @@ class ProductController extends Controller
 
         if ($request->search) {
             $products = $products->whereHas('product', function ($q) use ($request) {
-                $q->where('name', 'LIKE', "%{$request->search}%")
-                    ->orWhere('code', 'LIKE', "%{$request->search}%");
+                // check if is code
+                if ((int)$request->search == $request->search) {
+                    $q->where('code', '=', $request->search);
+                } else {
+                    $q->where('name', 'LIKE', "%{$request->search}%");
+                }
             });
         }
 

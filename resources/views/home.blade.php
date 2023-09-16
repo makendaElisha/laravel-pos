@@ -138,7 +138,10 @@
                                 <th>Code</th>
                                 <th>Nom</th>
                                 @if ($user->is_admin)
+                                    <th>Stock (Depot)</th>
                                     <th>Modifier</th>
+                                @else
+                                    <th>Stock (Magasin)</th>
                                 @endif
                             </tr>
                         </thead>
@@ -148,9 +151,22 @@
                                 <td>{{$product->code}}</td>
                                 <td>{{$product->name}}</td>
                                 @if ($user->is_admin)
+                                    @php
+                                        $stock = (floor($product->quantity / $product->items_in_box)) . ' CRT Et ' . (floor($product->quantity % $product->items_in_box)) . ' PCE';
+                                    @endphp
+                                    <td>
+                                        <div>{{$stock}}</div>
+                                    </td>
                                     <td>
                                         <a href="{{ route('products.edit', $product->id) }}" class="btn btn-primary"><i
                                                 class="fas fa-edit"></i></a>
+                                    </td>
+                                @else
+                                    @php
+                                        $stock = (floor($product->shop_quantity / $product->items_in_box)) . ' CRT Et ' . (floor($product->shop_quantity % $product->items_in_box)) . ' PCE';
+                                    @endphp
+                                    <td>
+                                        <div>{{$stock}}</div>
                                     </td>
                                 @endif
 

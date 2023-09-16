@@ -21,8 +21,12 @@ class ShopController extends Controller
 
         if ($search) {
             $shopProducts->whereHas('product', function($q) use($search) {
-                $q->where('name', 'LIKE', "%{$search}%")
-                    ->orWhere('code', 'LIKE', "%{$search}%");
+                // check if is code
+                if ((int)$search == $search) {
+                    $q->where('code', '=', $search);
+                } else {
+                    $q->where('name', 'LIKE', "%{$search}%");
+                }
             });
         }
 

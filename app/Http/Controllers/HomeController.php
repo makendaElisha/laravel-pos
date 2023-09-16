@@ -60,6 +60,9 @@ class HomeController extends Controller
             }
 
             $lowStockProducts = Product::whereIn('id', $ids)->get();
+            foreach ($lowStockProducts as $prod) {
+                $prod->shop_quantity = $shpProds->where('product_id', $prod->id)->first()->quantity;
+            }
             $allShopSales = Order::where('shop_id', $currShop->id)->sum('total');
         }
 
