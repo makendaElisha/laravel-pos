@@ -26,7 +26,7 @@ class ShopController extends Controller
             });
         }
 
-        $shopProducts = $shopProducts->latest()->paginate(10);
+        $shopProducts = $shopProducts->paginate(10);
         $shops = Shop::get();
 
         foreach ($shopProducts as $key => $shopProd) {

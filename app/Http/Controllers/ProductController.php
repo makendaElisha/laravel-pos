@@ -29,7 +29,7 @@ class ProductController extends Controller
             $products = $products->where('name', 'LIKE', "%{$request->search}%")
                 ->orWhere('code', 'LIKE', "%{$request->search}%");
         }
-        $products = $products->latest()->paginate(10);
+        $products = $products->paginate(10);
         $shops = Shop::get();
         $shopProducts = ShopProduct::get();
 
