@@ -15,7 +15,7 @@ class OrderController extends Controller
 {
     public function index(Request $request) {
         $user = Auth()->user();
-        $orders = new Order();
+        $orders = Order::with(['items.product', 'user']);
         $shops = Shop::get();
 
         $shopId = '0';
@@ -55,7 +55,9 @@ class OrderController extends Controller
 
     public function storeCart(OrderStoreRequest $request)
     {
-        $invNumber = sprintf('%06d', DB::table('orders')->max('order_number'));
+        $invNumber = DB::table('orders')
+            ->select(DB::raw('MAX(CAST(order_number AS SIGNED)) as max_order_number'))
+            ->value('max_order_number');
 
         $order = Order::create([
             'order_number' => $invNumber ? $invNumber + 1 : 1,
@@ -93,6 +95,35 @@ class OrderController extends Controller
             ]);
         }
 
-        return 'success';
+        return response()->json([
+            'order' => Order::with(['items.product', 'user'])->where('id', $order->id)->first(),
+        ], 200);
+    }
+
+    public function destroy(Order $order)
+    {
+        //Return stock
+        foreach ($order->items as $orderItem) {
+            $shopProd = ShopProduct::where('shop_id', $order->shop_id)
+                ->where('product_id', $orderItem->product_id)
+                ->first();
+
+            $shopProd->quantity += (int) $orderItem->quantity;
+            $shopProd->save();
+
+            //update stock mouvement
+            StockMouvement::create([
+                'product_id' => $shopProd->id,
+                'type' => StockMouvement::CANCEL_BILL,
+                'quantity' => $orderItem->quantity,
+                'user_id' => Auth()->user()->id,
+                'shop_id' => $order->shop_id,
+            ]);
+        }
+
+        $order->items()->delete();
+        $order->delete();
+
+        return redirect()->route('orders.index');
     }
 }

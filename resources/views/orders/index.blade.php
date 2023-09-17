@@ -45,6 +45,7 @@
                     <th>Total</th>
                     <th>Crée par</th>
                     <th>Date</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -55,6 +56,20 @@
                     <td>{{ number_format($order->paid, 0, ',', '.') }} {{ config('settings.currency_symbol') }}</td>
                     <td>{{$order->user->first_name}}</td>
                     <td>{{$order->created_at}}</td>
+                    <td>
+                        <button class="ml-1 btn btn-primary"
+                            data-toggle="modal"
+                            data-target="#billDetails"
+                            data-product="{{ $order }}"
+                            data-toggle="tooltip" data-placement="bottom" title="Voir Facture"
+                        >
+                            <i class="fas fa-info"></i>
+                        </button>
+                        @if ($user->is_admin)
+                        <button class="ml-2 btn btn-danger btn-delete" data-url="{{route('orders.destroy', $order)}}"><i
+                            class="fas fa-trash"></i></button>
+                        @endif
+                    </td>
                 </tr>
                 @endforeach
             </tbody>
@@ -65,11 +80,105 @@
                     <th>{{ number_format($total, 0, ',', '.') }} {{ config('settings.currency_symbol') }} </th>
                     <th></th>
                     <th></th>
+                    <th></th>
                 </tr>
             </tfoot>
         </table>
         {{ $orders->render() }}
     </div>
+    <div class="modal fade" id="billDetails" tabindex="-1" role="dialog" aria-labelledby="billDetailsLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="billDetailsLabel"><b class="">Facture No</b>: <span id="articleName">{{ $order->order_number ?? '' }}<span></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <u><h6 class="modal-title" id="billDetailsLabel"><b class="">Saisie Par:</b>: <span id="articleName">{{ $order->user->first_name ?? '' }}<span></h6></u>
+
+                    @if (isset($order))
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td>No</td>
+                                    <td>Article</td>
+                                    <td>Qté</td>
+                                    <td>P.U</td>
+                                    <td>P.T</td>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach ($order->items as $key => $item)
+                                    <tr>
+                                        <td>{{ $key + 1 }}</td>
+                                        <td>{{ $item->product->name }}</td>
+                                        <td>{{ $item->quantity }}</td>
+                                        <td>{{ $item->product->sell_price }} FC</td>
+                                        <td>{{ $item->product->sell_price * $item->quantity }}</td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <td></td>
+                                    <td></td>
+                                    <td>
+                                        <h5><b>Total:</b></h5>
+                                    <td>
+                                        <h5><b>{{ $order->paid }} FC</b></h5>
+                                    </td>
+                                </tr>
+                            </thead>
+                        </table>
+                    @endif
+                </div>
+                <div class="modal-footer d-flex flex-row justify-content-center">
+                    <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
+@section('js')
+<script src="{{ asset('plugins/sweetalert2/sweetalert2.min.js') }}"></script>
+<script src="https://code.jquery.com/jquery-3.7.0.slim.min.js" integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE=" crossorigin="anonymous"></script>
+
+<script>
+    $(document).ready(function () {
+        $(document).on('click', '.btn-delete', function () {
+            $this = $(this);
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: 'btn btn-success',
+                    cancelButton: 'btn btn-danger'
+                },
+                buttonsStyling: false
+                })
+
+                swalWithBootstrapButtons.fire({
+                title: 'Etes-vous sur?',
+                text: "Voulez-vous vraiment supprimer cette facture?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Oui, Supprimer!',
+                cancelButtonText: 'No',
+                reverseButtons: true
+                }).then((result) => {
+                if (result.value) {
+                    $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
+                        $this.closest('tr').fadeOut(500, function () {
+                            $(this).remove();
+                        })
+                    })
+                }
+            })
+        })
+    })
+</script>
+@endsection

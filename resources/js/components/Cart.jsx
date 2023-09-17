@@ -20,6 +20,7 @@ class Cart extends Component {
             discount: null,
             discountPercent: null,
             shopId: null,
+            orderToPrint: null,
         };
 
         this.setShop = this.setShop.bind(this);
@@ -266,9 +267,18 @@ class Cart extends Component {
                         paid: this.getTotalToPay(this.state.cart),
                     })
                     .then((res) => {
-                        location.reload();
+                        this.loadProducts();
+                        // location.reload();
+                        // Reset before printing
+                        if (res && res.data && res.data.order) {
+                            this.setState({ orderToPrint: res.data.order });
+                            this.setState({ cart: [] });
+                            this.setState({ customer: '' });
+                            this.handlePrinting();
+                        }
                     })
                     .catch((err) => {
+                        this.loadProducts();
                         Swal.showValidationMessage(err.response.data.message);
                     });
             },
@@ -279,8 +289,47 @@ class Cart extends Component {
             }
         });
     }
+
+    handlePrinting() {
+        var content = document.getElementById("divcontents");
+        var pri = document.getElementById("ifmcontentstoprint").contentWindow;
+        pri.document.open();
+        pri.document.write(content.innerHTML);
+        pri.document.close();
+        pri.focus();
+        pri.print();
+    }
+
     render() {
-        const { cart, products, customers,customer, code } = this.state;
+        const { cart, products, customers,customer, code, orderToPrint } = this.state;
+
+        // Define the styles for the outer div
+        const containerStyle = {
+            width: '3.125in', // 3 1/8 inches
+            // height: '230px',
+            // border: '1px solid #000', // Add a border for visibility
+            padding: '10px', // Add padding for spacing
+            fontSize: '12px',
+
+            // width: '155px',
+            // maxWidth: '155px',
+        };
+
+        // Define the styles for the table
+        const tableStyle = {
+            width: '100%',
+            borderCollapse: 'collapse',
+            marginBottom: '3px',
+            marginTop: '6px',
+            fontSize: '12px',
+        };
+
+        const thTdStyle = {
+            border: '1px solid #000',
+            padding: '5px',
+            textAlign: 'left',
+        };
+
         return (
             <div className="row">
                 <div className="col-md-6">
@@ -431,6 +480,66 @@ class Cart extends Component {
                                 Sauvegarder
                             </button>
                         </div>
+                        <div id="divcontents" style={{ display: 'none',}}>
+                            <div style={containerStyle} className="receipt-container">
+                                <div style={{display: 'flex', justifyContent: 'center', margingBottom: '8px',}}>
+                                    <p className="centered"><span style={{ fontWeight: 'bold', fontSize: '16px', }}>3eme ADAM</span>
+                                        <br />Address: Av des Usines
+                                        <br />C/Lubumbashi, RDC,
+                                        <br />Contacts: +243 995 672 007
+                                    </p>
+                                </div>
+
+                                <div style={{display: 'flex', justifyContent: 'space-between',}}>
+                                    <div>FACTURE No: { orderToPrint?.order_number }</div>
+                                    <div>Date: { new Date().toLocaleDateString('en-GB') }</div>
+                                </div>
+
+                                <table style={tableStyle}>
+                                    <thead>
+                                        <tr>
+                                            <th style={thTdStyle}>No</th>
+                                            <th style={thTdStyle}>Article</th>
+                                            <th style={thTdStyle}>Qté</th>
+                                            <th style={thTdStyle}>P.U</th>
+                                            <th style={thTdStyle}>P.T</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {orderToPrint && orderToPrint.items && orderToPrint.items.map((item, i) => {
+                                            return (
+                                                <tr>
+                                                    <td style={thTdStyle}>{ i+1 }</td>
+                                                    <td style={thTdStyle}>{ item.product?.name}</td>
+                                                    <td style={thTdStyle}>{ item.quantity }</td>
+                                                    <td style={thTdStyle}>{ item.product?.sell_price }</td>
+                                                    <td style={thTdStyle}> { item.product?.sell_price * item.quantity } </td>
+                                                </tr>
+                                            )
+                                        })}
+                                        {/* Add more rows as needed */}
+                                    </tbody>
+                                </table>
+
+                                <div style={{display: 'flex', flexDirection: 'column', justifyContent: 'space-around', }}>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px',}}>
+                                        <div></div>
+                                        <div>Total:</div>
+                                        <div>{ orderToPrint?.total } FC</div>
+                                    </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px',}}>
+                                        <div></div>
+                                        <div>Reduction:</div>
+                                        <div>{ orderToPrint?.discount }</div>
+                                    </div>
+                                    <div style={{display: 'flex', justifyContent: 'space-between', fontWeight: 'bold', fontSize: '14px',}}>
+                                        <div></div>
+                                        <div>Net a payer:</div>
+                                        <div>{orderToPrint?.paid } FC</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div className="col-md-6">
@@ -459,6 +568,8 @@ class Cart extends Component {
                         ))}
                     </div>
                 </div>
+                <iframe id="ifmcontentstoprint" style={{ height: '0px', width: '0px', position: 'absolute'}}>
+                </iframe>
             </div>
         );
     }
