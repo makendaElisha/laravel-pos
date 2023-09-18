@@ -306,7 +306,8 @@ class Cart extends Component {
         // Define the styles for the outer div
         const containerStyle = {
             width: '3.125in', // 3 1/8 inches
-            // height: '230px',
+            height: '230px',
+            maxHeight: '230px',
             // border: '1px solid #000', // Add a border for visibility
             padding: '10px', // Add padding for spacing
             fontSize: '12px',
