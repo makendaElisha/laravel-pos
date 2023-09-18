@@ -307,13 +307,10 @@ class Cart extends Component {
         const containerStyle = {
             width: '3.125in', // 3 1/8 inches
             height: '230px',
-            maxHeight: '230px',
             // border: '1px solid #000', // Add a border for visibility
             padding: '10px', // Add padding for spacing
             fontSize: '12px',
-
-            // width: '155px',
-            // maxWidth: '155px',
+            pageBreakAfter: 'always',
         };
 
         // Define the styles for the table
@@ -372,8 +369,8 @@ class Cart extends Component {
                             </select> */}
                         </div>
                     </div>
-                    <div className="user-cart">
-                        <div className="card">
+                    <div className="user-cart" style={{overflowY: 'auto',}}>
+                        <div className="card" style={{overflowY: 'auto',}}>
                             <table className="table table-striped">
                                 <thead>
                                     <tr>
