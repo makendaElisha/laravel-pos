@@ -57,10 +57,10 @@
                     <td>{{$order->user->first_name}}</td>
                     <td>{{$order->created_at}}</td>
                     <td>
-                        <button class="ml-1 btn btn-primary"
+                        <button class="ml-1 btn btn-primary btinformation"
                             data-toggle="modal"
                             data-target="#billDetails"
-                            data-product="{{ $order }}"
+                            data-order="{{ $order }}"
                             data-toggle="tooltip" data-placement="bottom" title="Voir Facture"
                         >
                             <i class="fas fa-info"></i>
@@ -90,51 +90,49 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="billDetailsLabel"><b class="">Facture No</b>: <span id="articleName">{{ $order->order_number ?? '' }}<span></h5>
+                    <h5 class="modal-title" id="billDetailsLabel"><b class="">Facture No</b>: <span id="orderNumber"><span></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <u><h6 class="modal-title" id="billDetailsLabel"><b class="">Saisie Par:</b>: <span id="articleName">{{ $order->user->first_name ?? '' }}<span></h6></u>
+                    <u><h6 class="modal-title" id="billDetailsLabel"><b class="">Saisie Par:</b>: <span id="orderUser"><span></h6></u>
 
-                    @if (isset($order))
-                        <table class="table">
-                            <thead>
+                    <table class="table" id="data-table">
+                        <thead>
+                            <tr>
+                                <td>No</td>
+                                <td>Article</td>
+                                <td>Qté</td>
+                                <td>P.U</td>
+                                <td>P.T</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {{-- @foreach ($order->items as $key => $item)
                                 <tr>
-                                    <td>No</td>
-                                    <td>Article</td>
-                                    <td>Qté</td>
-                                    <td>P.U</td>
-                                    <td>P.T</td>
+                                    <td>{{ $key + 1 }}</td>
+                                    <td>{{ $item->product->name }}</td>
+                                    <td>{{ $item->quantity }}</td>
+                                    <td>{{ $item->product->sell_price }} FC</td>
+                                    <td>{{ $item->product->sell_price * $item->quantity }}</td>
                                 </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($order->items as $key => $item)
-                                    <tr>
-                                        <td>{{ $key + 1 }}</td>
-                                        <td>{{ $item->product->name }}</td>
-                                        <td>{{ $item->quantity }}</td>
-                                        <td>{{ $item->product->sell_price }} FC</td>
-                                        <td>{{ $item->product->sell_price * $item->quantity }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <td></td>
-                                    <td></td>
-                                    <td>
-                                        <h5><b>Total:</b></h5>
-                                    <td>
-                                        <h5><b>{{ $order->paid }} FC</b></h5>
-                                    </td>
-                                </tr>
-                            </thead>
-                        </table>
-                    @endif
+                            @endforeach --}}
+                        </tbody>
+                    </table>
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <h5><b>Total:</b></h5>
+                                <td>
+                                    <h5><b id="orderTotal"></b></h5>
+                                </td>
+                            </tr>
+                        </thead>
+                    </table>
                 </div>
                 <div class="modal-footer d-flex flex-row justify-content-center">
                     <button type="button" class="btn btn-primary" data-dismiss="modal">Fermer</button>
@@ -178,6 +176,31 @@
                     })
                 }
             })
+        });
+
+        $('#billDetails').on('show.bs.modal', function (event) {
+            console.log('started');
+            $this = $(this);
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var order = button.data('order');
+            var tableBody = $('#data-table tbody');
+            tableBody.empty(); // Clear existing data if any
+
+            $(this).find('#orderNumber').text(order.order_number ?? '');
+            $(this).find('#orderUser').text(order.user?.first_name ?? '');
+            $(this).find('#orderTotal').text(order.total ?? '');
+
+
+            $.each(order?.items, function (index, row) {
+                var newRow = '<tr>' +
+                    '<td>' + (index + 1) + '</td>' +
+                    '<td>' + row.product?.name + '</td>' +
+                    '<td>' + row.product?.sell_price + '</td>' +
+                    '<td>' + Number(row.product?.sell_price) * Number(row.quantity) + '</td>' +
+                    '</tr>';
+
+                tableBody.append(newRow);
+            });
         })
     })
 </script>

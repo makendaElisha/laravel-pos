@@ -291,13 +291,66 @@ class Cart extends Component {
     }
 
     handlePrinting() {
+
+        // old start
+        // var content = document.getElementById("divcontents");
+        // var pri = document.getElementById("ifmcontentstoprint").contentWindow;
+        // pri.document.open();
+        // pri.document.write(content.innerHTML);
+        // pri.document.close();
+        // pri.focus();
+        // pri.print();
+        // old end
+
+            // Define your CSS styles as a string
+        const styles = `
+            /* Define A5 page size for printing */
+            @page {
+                size: A5;
+                margin: 0;
+            }
+
+            /* Define the content area on the A5 page */
+            @media print {
+                html, body {
+                    width: 148mm; /* A5 width in millimeters */
+                    height: 210mm; /* A5 height in millimeters */
+                    margin: 0;
+                }
+                body {
+                    padding: 10mm; /* Add some padding to fit content within A5 */
+                }
+            }
+
+            /* Styles for the <div> you want to print */
+            .printable-content {
+                width: 138mm; /* Adjust the width to fit content within A5 */
+                height: 190mm; /* Adjust the height to fit content within A5 */
+                background-color: white; /* Ensure a white background for printing */
+                /* Add other styles as needed */
+            }
+        `;
+
+        // Get the iframe element
+        const iframe = document.getElementById('ifmcontentstoprint');
+
+        // Get the iframe's document
+        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+
+        // Create a <style> element and append the CSS styles
+        const styleElement = iframeDoc.createElement('style');
+        styleElement.innerHTML = styles;
+        iframeDoc.head.appendChild(styleElement);
+
+        // Trigger the print dialog for the iframe's content
         var content = document.getElementById("divcontents");
-        var pri = document.getElementById("ifmcontentstoprint").contentWindow;
+        var pri = iframe.contentWindow;
         pri.document.open();
         pri.document.write(content.innerHTML);
         pri.document.close();
         pri.focus();
         pri.print();
+        // iframe.contentWindow.print();
     }
 
     render() {
@@ -309,7 +362,7 @@ class Cart extends Component {
             height: '230px',
             // border: '1px solid #000', // Add a border for visibility
             padding: '10px', // Add padding for spacing
-            fontSize: '12px',
+            fontSize: '14px',
             pageBreakAfter: 'always',
         };
 
@@ -319,7 +372,7 @@ class Cart extends Component {
             borderCollapse: 'collapse',
             marginBottom: '3px',
             marginTop: '6px',
-            fontSize: '12px',
+            fontSize: '14px',
         };
 
         const thTdStyle = {
@@ -566,8 +619,14 @@ class Cart extends Component {
                         ))}
                     </div>
                 </div>
-                <iframe id="ifmcontentstoprint" style={{ height: '0px', width: '0px', position: 'absolute'}}>
-                </iframe>
+                <iframe
+                    id="ifmcontentstoprint"
+                    title="Reçue"
+                    width="100%"
+                    height="500px" // Set the desired height
+                ></iframe>
+                {/* <iframe id="ifmcontentstoprint" style={{ height: '0px', width: '0px', position: 'absolute'}}>
+                </iframe> */}
             </div>
         );
     }

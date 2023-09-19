@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\ShopProduct;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
@@ -28,20 +29,21 @@ class HomeController extends Controller
      */
     public function index()
     {
+        $today = Carbon::today();
         $user = Auth()->user();
         $lushi = Shop::where('name', Shop::LUBUMBASHI)->first();
         $kolwezi = Shop::where('name', Shop::KOLWEZI)->first();
         $kilwa = Shop::where('name', Shop::KILWA)->first();
 
-        $orders = Order::with(['items', 'payments'])->get();
+        $orders = Order::with(['items', 'payments'])->where('created_at', '>=', date('Y-m-d').' 00:00:00')->get();
         $customers_count = Customer::count();
 
-        $dailySells = Order::sum('total');
+        $dailySells = Order::where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
 
         $allDailySales = [
-            Shop::LUBUMBASHI => $lushi ? Order::where('shop_id', $lushi->id)->sum('total') : '',
-            Shop::KILWA => $kolwezi ? Order::where('shop_id', $kilwa->id)->sum('total') : '',
-            Shop::KOLWEZI => $kilwa ? Order::where('shop_id', $kolwezi->id)->sum('total') : '',
+            Shop::LUBUMBASHI => $lushi ? Order::where('shop_id', $lushi->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total') : '',
+            Shop::KILWA => $kolwezi ? Order::where('shop_id', $kilwa->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total') : '',
+            Shop::KOLWEZI => $kilwa ? Order::where('shop_id', $kolwezi->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total') : '',
         ];
 
         $lowStockProducts = Product::whereColumn('quantity', '<', 'min_quantity')->get();
@@ -49,7 +51,7 @@ class HomeController extends Controller
         $allShopSales = 0;
         if (!$user->is_admin) {
             $currShop = Shop::where('name', $user->shop_name)->first();
-            $dailySells = Order::where('shop_id', $currShop->id)->sum('total');
+            $dailySells = Order::where('shop_id', $currShop->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
 
             $ids = [];
             $shpProds = ShopProduct::with('product')->where('shop_id', $currShop->id)->get();
@@ -63,10 +65,10 @@ class HomeController extends Controller
             foreach ($lowStockProducts as $prod) {
                 $prod->shop_quantity = $shpProds->where('product_id', $prod->id)->first()->quantity;
             }
-            $allShopSales = Order::where('shop_id', $currShop->id)->sum('total');
+            $allShopSales = Order::where('shop_id', $currShop->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
         }
 
-        $dailyBills = count(Order::get());
+        $dailyBills = count(Order::where('created_at', '>=', date('Y-m-d').' 00:00:00')->get());
 
         return view('home', [
             'user' => $user,
