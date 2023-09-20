@@ -313,18 +313,18 @@ class Cart extends Component {
             /* Define the content area on the A5 page */
             @media print {
                 html, body {
-                    width: 148mm; /* A5 width in millimeters */
+                    width: 110mm; /* A5 width in millimeters */
                     height: 210mm; /* A5 height in millimeters */
                     margin: 0;
                 }
                 body {
-                    padding: 10mm; /* Add some padding to fit content within A5 */
+                    padding: 1mm; /* Add some padding to fit content within A5 */
                 }
             }
 
             /* Styles for the <div> you want to print */
             .printable-content {
-                width: 138mm; /* Adjust the width to fit content within A5 */
+                width: 100mm; /* Adjust the width to fit content within A5 */
                 height: 190mm; /* Adjust the height to fit content within A5 */
                 background-color: white; /* Ensure a white background for printing */
                 /* Add other styles as needed */
@@ -358,10 +358,10 @@ class Cart extends Component {
 
         // Define the styles for the outer div
         const containerStyle = {
-            width: '3.125in', // 3 1/8 inches
+            width: '2.3in', // 3 1/8 inches
             height: '230px',
             // border: '1px solid #000', // Add a border for visibility
-            padding: '10px', // Add padding for spacing
+            padding: '0px', // Add padding for spacing
             fontSize: '14px',
             pageBreakAfter: 'always',
         };
