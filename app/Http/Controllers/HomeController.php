@@ -56,7 +56,7 @@ class HomeController extends Controller
             $ids = [];
             $shpProds = ShopProduct::with('product')->where('shop_id', $currShop->id)->get();
             foreach ($shpProds as $prodItem) {
-                if ($prodItem->quantity < $prodItem->product->min_quantity) {
+                if ($prodItem->product && $prodItem->quantity < $prodItem->product->min_quantity) {
                     $ids[] = $prodItem->product_id;
                 }
             }
