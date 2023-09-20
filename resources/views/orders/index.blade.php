@@ -195,6 +195,7 @@
                 var newRow = '<tr>' +
                     '<td>' + (index + 1) + '</td>' +
                     '<td>' + row.product?.name + '</td>' +
+                    '<td>' + row.quantity + '</td>' +
                     '<td>' + row.product?.sell_price + '</td>' +
                     '<td>' + Number(row.product?.sell_price) * Number(row.quantity) + '</td>' +
                     '</tr>';
