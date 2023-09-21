@@ -83,6 +83,57 @@
 
         @endif
     </div>
+    @if (!$user->is_admin && count($shopProducts) > 0)
+        <div class="row mt-5">
+            <div class="col-8">
+                <!-- small box -->
+                <div class="small-box table-primary">
+                    <div class="inner">
+                        {{-- <h3>{{config('settings.currency_symbol')}} {{number_format($income_today, 2)}}</h3> --}}
+                        <h3>Articles stock modifiés</h3>
+
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Code</th>
+                                    <th>Nom</th>
+                                    <th>Quantité</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @php
+                                    $ids = [];
+                                @endphp
+                                @foreach ($shopProducts as $shopProd)
+                                @php
+                                    $stock = (floor($shopProd->quantity / $shopProd->product->items_in_box)) . ' CRT Et ' . (floor($shopProd->quantity % $shopProd->product->items_in_box)) . ' PCE';
+                                    $ids []= $shopProd->id;
+                                @endphp
+                                    <tr>
+                                        <td>{{$shopProd->product->code}}</td>
+                                        <td>{{$shopProd->product->name}}</td>
+                                        <td>
+                                            <div>{{$stock}}</div>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+
+                        <form method="POST" action="{{ route('home.seen', ['ids' => json_encode($ids)]) }}">
+                            @csrf
+                            <button type="submit">Accuser reception</button>
+                        </form>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    {{-- <a href="{{route('orders.index')}}" class="small-box-footer">More info <i
+                            class="fas fa-arrow-circle-right"></i></a> --}}
+                </div>
+            </div>
+        </div>
+    @endif
     <div class="modal fade" id="allDailySales" tabindex="-1" role="dialog" aria-labelledby="updateStockLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">

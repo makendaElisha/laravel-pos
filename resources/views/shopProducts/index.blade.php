@@ -57,26 +57,26 @@
                     <td>{{$shopProd->product->items_in_box}}</td>
                     <td>{{posprice($shopProd->product->sell_price)}} F.C</td>
                     <td>
-                        @if ($shopProd->transfer_quantity > 0)
-                            @if ($user->is_admin)
-                                <button class="btn btn-danger"
-                                    data-toggle="modal"
-                                    data-target="#updateStock"
-                                    data-product="{{ $shopProd }}"
-                                    data-toggle="tooltip" data-placement="bottom" title="Annuler Transfer"
-                                >
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </button>
-                            @else
-                                <button class="btn btn-success"
-                                    data-toggle="modal"
-                                    data-target="#updateStock"
-                                    data-product="{{ $shopProd }}"
-                                    data-toggle="tooltip" data-placement="bottom" title="Valider Transfer"
-                                >
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </button>
-                            @endif
+                        @if ($user->is_admin)
+                            <button class="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#updateStock"
+                                data-product="{{ $shopProd }}"
+                                data-inbox="{{ $shopProd->product->items_in_box }}"
+                                data-quantity="{{ $stock }}"
+                                data-toggle="tooltip" data-placement="bottom" title="Modifier Stock au Magasin"
+                            >
+                                <i class="fas fa-edit"></i>
+                            </button>
+                        @else
+                            {{-- <button class="btn btn-success"
+                                data-toggle="modal"
+                                data-target="#updateStock"
+                                data-product="{{ $shopProd }}"
+                                data-toggle="tooltip" data-placement="bottom" title="Valider Transfer"
+                            >
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </button> --}}
                         @endif
                         {{-- <a href="{{ route('products.edit', $shopProd->product) }}" class="btn btn-primary"><i
                                 class="fas fa-edit"></i></a> --}}
@@ -91,19 +91,28 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    @if ($user->is_admin)
-                        <h5 class="modal-title" id="updateStockLabel"><b class="text-danger">ANNULER Transfer</b>: <span id="articleName"><span></h5>
-                    @else
-                        <h5 class="modal-title" id="updateStockLabel"><b class="text-success">Valider Transfer</b>: <span id="articleName"><span></h5>
-                    @endif
+                    <h5 class="modal-title" id="updateStockLabel"> {{ $shop->name }}: <div id="articleName"><div></h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
+                <div class="modal-header">
+                    <h6><b>Quantité Presente:</b> <u id="articleStock" style="font-size: 1.2rem;" class="pr-1"></u></h6>
+                    <i id="articleDetail"></i>
+                </div>
                 <div class="modal-body">
-                    <h6>Quantité Envoyée: <u id="articleStock" style="font-size: 1.2rem;" class="pr-1"></u><i>Pieces</i></h6>
-                    <label for="inputField">Quantité:</label>
-                    <input type="number" id="inputField" max="20" class="form-control" placeholder="Entrez la valeur">
+                    <h5 class="modal-title" id="updateStockLabel"><b class="text-danger">Modification du stock!</b> <div id="articleName"><div></h5>
+                    <div class="form-row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="inputBox">Nombre des CARTONS</label>
+                            <input type="number" id="inputBox" max="20" class="form-control" placeholder="Combien des cartons">
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="inputPce">Nombre des PIECES:</label>
+                            <input type="number" id="inputPce" max="20" class="form-control" placeholder="Combien des pieces">
+                        </div>
+                    </div>
                 </div>
                 <div class="modal-footer d-flex flex-row justify-content-between">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
@@ -129,14 +138,32 @@
             var $userId = {!! $userId !!};
             var button = $(event.relatedTarget); // Button that triggered the modal
             var prodShop = button.data('product');
+            var qtyText = button.data('quantity');
+            var inbox = button.data('inbox');
             var itemId = prodShop?.product.id;
             var displayName = prodShop.product ? `${prodShop.product.name} (code: ${prodShop.product.code})` : '';
 
+            // Get box and pce
+            var current_box = 0;
+            var current_pce = prodShop.quantity;
+
+            if (inbox && inbox > 0) {
+                current_box = Math.floor(Number(prodShop.quantity) / Number(inbox));
+                current_pce = Number(prodShop.quantity) % Number(inbox);
+            }
+
+            console.log('box, pce', current_box, current_pce);
+
             $(this).find('#articleName').text(displayName);
-            $(this).find('#articleStock').text(prodShop.transfer_quantity ?? '');
+            $(this).find('#articleStock').text(qtyText ?? '');
+            $(this).find('#articleDetail').text(`(1 Carton = ${inbox} Piece)`);
+
+            $(this).find('#inputBox').val(current_box);
+            $(this).find('#inputPce').val(current_pce);
 
             $('#confirmButton').click(function(){
-                var quantity = $("#inputField").val();
+                var quantity_box = $("#inputBox").val();
+                var quantity_pce = $("#inputPce").val();
 
                 $.post("/api/set-quantity/shop", {
                     _token: '{{csrf_token()}}',
@@ -145,7 +172,8 @@
                     shop_prod_id: prodShop.id,
                     trans_prod_id: prodShop.transfer_id,
                     shop_id: $shop.id,
-                    quantity: quantity,
+                    quantity_box: quantity_box,
+                    quantity_pce: quantity_pce,
                     user_id: $userId,
                 }, function (res) {
                     console.log('RRRRR ', res);

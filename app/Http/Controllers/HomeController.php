@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Product;
 use App\Models\Shop;
 use App\Models\ShopProduct;
+use App\Models\UpdatedStock;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -49,6 +50,7 @@ class HomeController extends Controller
         $lowStockProducts = Product::whereColumn('quantity', '<', 'min_quantity')->get();
 
         $allShopSales = 0;
+        $shopProducts = [];
         if (!$user->is_admin) {
             $currShop = Shop::where('name', $user->shop_name)->first();
             $dailySells = Order::where('shop_id', $currShop->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
@@ -66,12 +68,20 @@ class HomeController extends Controller
                 $prod->shop_quantity = $shpProds->where('product_id', $prod->id)->first()->quantity;
             }
             $allShopSales = Order::where('shop_id', $currShop->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
+
+            // updated stock
+            $shopProducts = UpdatedStock::with('product')
+                ->where('shop_id', $currShop->id)
+                ->whereNull('seen_by')
+                ->get();
         }
 
         $dailyBills = count(Order::where('created_at', '>=', date('Y-m-d').' 00:00:00')->get());
 
+
         return view('home', [
             'user' => $user,
+            'shopProducts' => $shopProducts,
             'dailySells' => $dailySells,
             'allShopSales' => $allShopSales,
             'allDailySales' => $allDailySales,
@@ -92,5 +102,20 @@ class HomeController extends Controller
             })->sum(),
             'customers_count' => $customers_count
         ]);
+    }
+
+    public function seen(Request $request) {
+        $ids = $request->ids;
+
+        if ($ids) {
+            $ids = json_decode($ids);
+
+            foreach ($ids as $id) {
+                $record = UpdatedStock::where('id', $id)->first();
+                $record->seen_by = Auth()->user()->id;
+                $record->save();
+            }
+        }
+        return redirect()->back();
     }
 }

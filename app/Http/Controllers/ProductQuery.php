@@ -7,6 +7,7 @@ use App\Models\Shop;
 use App\Models\ShopProduct;
 use App\Models\StockMouvement;
 use App\Models\TransferShopProduct;
+use App\Models\UpdatedStock;
 use Illuminate\Http\Request;
 
 class ProductQuery extends Controller
@@ -22,42 +23,38 @@ class ProductQuery extends Controller
     public function setShopProductQuantity(Request $request)
     {
         $success = false;
-        if ($request->is_admin == 1) {
-            $prod = Product::find($request->product_id);
-            $prod->quantity = $prod->quantity + $request->quantity;
-            $prod->save();
+        $qtyBox = $request->quantity_box;
+        $qtyPce = $request->quantity_pce;
+        $product = Product::find($request->product_id);
+        $quantity = $qtyPce;
 
-            $shopTrans = TransferShopProduct::find($request->trans_prod_id);
-            $shopTrans->quantity = $shopTrans->quantity - $request->quantity;
-            $shopTrans->save();
-
-            $success = true;
-
-            $mouve = StockMouvement::STORE_RETURN;
-        } else {
-            $shopProd = ShopProduct::find($request->shop_prod_id);
-            $shopProd->quantity = $shopProd->quantity + $request->quantity;
-            $shopProd->save();
-
-            $shopTrans = TransferShopProduct::find($request->trans_prod_id);
-            $shopTrans->quantity = $shopTrans->quantity - $request->quantity;
-            $shopTrans->save();
-
-            $success = true;
-
-            $mouve = StockMouvement::SHOP_INCREASE;
+        if ($qtyBox && $product->items_in_box > 0) {
+            $quantity = $qtyPce + floor($qtyBox * $product->items_in_box);
         }
+
+        $shopProd = ShopProduct::find($request->shop_prod_id);
+        $shopProd->quantity = $quantity;
+        $shopProd->save();
+
+        $success = true;
 
         //Log mouvement
-        if ($success) {
-            StockMouvement::create([
-                'product_id' => $request->product_id,
-                'type' => $mouve,
-                'quantity' => $request->quantity,
-                'user_id' => $request->user_id,
-                'shop_id' => $request->shop_id,
-            ]);
-        }
+        StockMouvement::create([
+            'product_id' => $request->product_id,
+            'type' => StockMouvement::SHOP_EDITED,
+            'quantity' => $quantity,
+            'user_id' => $request->user_id,
+            'shop_id' => $request->shop_id,
+        ]);
+
+        //Log notification shop
+        UpdatedStock::create([
+            'product_id' => $request->product_id,
+            'quantity' => $quantity,
+            'sent_by' => $request->user_id,
+            'shop_id' => $request->shop_id,
+        ]);
+
 
         return response()->json([
             'product' => $success,

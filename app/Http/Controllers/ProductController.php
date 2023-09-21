@@ -10,6 +10,7 @@ use App\Models\Shop;
 use App\Models\ShopProduct;
 use App\Models\StockMouvement;
 use App\Models\TransferShopProduct;
+use App\Models\UpdatedStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -113,16 +114,44 @@ class ProductController extends Controller
         }
 
         foreach ($quantities as $key => $qty) {
-            $transProd = TransferShopProduct::firstOrCreate([
-                'product_id' => $productId,
-                'shop_id' => $shops[$key],
-            ]);
+            if ($qty > 0) {
+                $shopProduct = ShopProduct::firstOrCreate([
+                    'product_id' => $productId,
+                    'shop_id' => $shops[$key],
+                ]);
 
-            $transProd->quantity = ($transProd->quantity ?? 0) + $qty;
-            $transProd->save();
+                $shopProduct->quantity = ($shopProduct->quantity ?? 0) + $qty;
+                $shopProduct->save();
 
-            $product->quantity -= $qty;
-            $product->save();
+                $product->quantity -= $qty;
+                $product->save();
+
+                //Log mouvement shop
+                UpdatedStock::create([
+                    'product_id' => $productId,
+                    'quantity' => $qty,
+                    'sent_by' => $request->user_id,
+                    'shop_id' => $shops[$key],
+                ]);
+
+                //Log mouvement shop
+                StockMouvement::create([
+                    'product_id' => $productId,
+                    'type' => StockMouvement::SHOP_INCREASE,
+                    'quantity' => $qty,
+                    'user_id' => $request->user_id,
+                    'shop_id' => $shops[$key],
+                ]);
+
+                //Log mouvement store
+                StockMouvement::create([
+                    'product_id' => $productId,
+                    'type' => StockMouvement::STORE_DECREASED,
+                    'quantity' => $qty,
+                    'user_id' => $request->user_id,
+                    'shop_id' => $shops[$key],
+                ]);
+            }
         }
 
         return redirect()->route('assign.products', $product)
