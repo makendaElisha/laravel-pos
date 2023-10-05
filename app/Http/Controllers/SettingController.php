@@ -27,7 +27,7 @@ class SettingController extends Controller
     public function getDiscount()
     {
         $discount = (int) (Setting::where('key', 'min_discount_amount')->first())->value ?? 0;
-        $discountPercent = (int) (Setting::where('key', 'discount_percentage')->first())->value ?? 0;
+        $discountPercent = (float) (Setting::where('key', 'discount_percentage')->first())->value ?? 0;
 
         return response([
             'discount' => $discount,
