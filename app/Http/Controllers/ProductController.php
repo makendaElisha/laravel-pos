@@ -181,23 +181,42 @@ class ProductController extends Controller
         // get quanitity
         $quantity = ($request->quantity_box * $request->items_in_box) + ($request->quantity_pce);
 
+        //prices
+        $lushi = Shop::where('name', Shop::LUBUMBASHI)->first();
+        $kolwezi = Shop::where('name', Shop::KOLWEZI)->first();
+        $kilwa = Shop::where('name', Shop::KILWA)->first();
+
         $product = Product::create([
             'name' => $request->name,
             'description' => $request->description,
             'code' => $request->code,
             'buy_price' => $request->buy_price,
-            'sell_price' => $request->sell_price,
+            // 'sell_price' => $request->sell_price,
             'quantity' => $quantity,
             'min_quantity' => $request->min_quantity,
             'items_in_box' => $request->items_in_box,
         ]);
 
         foreach (Shop::get() as $key => $shop) {
-            $transProd = ShopProduct::firstOrCreate([
+            $shopProd = ShopProduct::firstOrCreate([
                 'product_id' => $product->id,
                 'shop_id' => $shop->id,
                 'quantity' => 0,
+                'sell_price' => $request->sell_price,
             ]);
+
+            if ($shopProd->shop_id == $lushi->id) {
+                $shopProd->sell_price = $request->sell_price_lushi;
+
+            } else if ($shopProd->shop_id == $kolwezi->id) {
+                $shopProd->sell_price = $request->sell_price_kolwezi;
+
+            } else if ($shopProd->shop_id == $kilwa->id) {
+                $shopProd->sell_price = $request->sell_price_kilwa;
+
+            }
+
+            $shopProd->save();
         }
 
         //Log mouvement
@@ -272,6 +291,30 @@ class ProductController extends Controller
         $product->items_in_box = $request->items_in_box;
         $product->quantity = $quantity;
         $product->min_quantity = $request->min_quantity;
+
+        //prices
+        $lushi = Shop::where('name', Shop::LUBUMBASHI)->first();
+        $kolwezi = Shop::where('name', Shop::KOLWEZI)->first();
+        $kilwa = Shop::where('name', Shop::KILWA)->first();
+
+        foreach (Shop::get() as $key => $shop) {
+            $shopProd = ShopProduct::firstOrCreate([
+                'product_id' => $product->id,
+                'shop_id' => $shop->id,
+            ]);
+
+            if ($shopProd->shop_id == $lushi->id) {
+                $shopProd->sell_price = $request->sell_price_lushi;
+
+            } else if ($shopProd->shop_id == $kolwezi->id) {
+                $shopProd->sell_price = $request->sell_price_kolwezi;
+
+            } else if ($shopProd->shop_id == $kilwa->id) {
+                $shopProd->sell_price = $request->sell_price_kilwa;
+            }
+
+            $shopProd->save();
+        }
 
         if (!$product->save()) {
             return redirect()->back()->with('error', 'Desolé, une erreur c\'est produite.');

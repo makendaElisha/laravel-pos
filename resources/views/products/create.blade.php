@@ -33,29 +33,8 @@
                 @enderror
             </div>
 
-            <div class="form-group">
-                <label for="description">Description</label>
-                <textarea name="description" class="form-control @error('description') is-invalid @enderror"
-                    id="description" placeholder="description">{{ old('description') }}</textarea>
-                @error('description')
-                <span class="invalid-feedback" role="alert">
-                    <strong>{{ $message }}</strong>
-                </span>
-                @enderror
-            </div>
-
-            <div class="form-row">
-                <div class="form-group col-md-6">
-                    <label for="sell_price">Prix de Vente (FC)</label>
-                    <input type="number" name="sell_price" class="form-control @error('sell_price') is-invalid @enderror" id="sell_price"
-                        placeholder="Le prix de vente par piece" value="{{ old('sell_price') }}">
-                    @error('sell_price')
-                    <span class="invalid-feedback" role="alert">
-                        <strong>{{ $message }}</strong>
-                    </span>
-                    @enderror
-                </div>
-                <div class="form-group col-md-6">
+            <div class="form-group row mb-4">
+                <div class="form-group col-md-12">
                     <label for="buy_price">Prix d'achat (FC)</label>
                     <input type="number" name="buy_price" class="form-control @error('buy_price') is-invalid @enderror" id="buy_price"
                         placeholder="Le prix d'achat par piece" value="{{ old('buy_price') }}">
@@ -65,6 +44,55 @@
                     </span>
                     @enderror
                 </div>
+            </div>
+
+            <div class="row mb-2">
+                <div class="col-3"><hr></div>
+                <div class="col-auto"><b>Les Prix de vente Par Magazin:</b></div>
+                <div class="col"><hr></div>
+            </div>
+
+            <div class="form-group row">
+                <label for="sell_price_lushi" class="col-3 col-form-label">LUBUMBASHI:</label>
+                <div class="col-4">
+                    <input type="number" name="sell_price_lushi" class="form-control mx-sm-3 @error('sell_price_lushi') is-invalid @enderror" id="sell_price_lushi"
+                        placeholder="Le prix de vente par piece" value="{{ old('sell_price_lushi') }}">
+                    @error('sell_price_lushi')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="sell_price_kolwezi" class="col-3 col-form-label">KOLWEZI:</label>
+                <div class="col-4">
+                    <input type="number" name="sell_price_kolwezi" class="form-control mx-sm-3 @error('sell_price_kolwezi') is-invalid @enderror" id="sell_price_kolwezi"
+                        placeholder="Le prix de vente par piece" value="{{ old('sell_price_kolwezi') }}">
+                    @error('sell_price_kolwezi')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="sell_price_kilwa" class="col-3 col-form-label">KILWA:</label>
+                <div class="col-4">
+                    <input type="number" name="sell_price_kilwa" class="form-control mx-sm-3 @error('sell_price_kilwa') is-invalid @enderror" id="sell_price_kilwa"
+                        placeholder="Le prix de vente par piece" value="{{ old('sell_price_kilwa') }}">
+                    @error('sell_price_kilwa')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="row mt-2">
+                <div class="col"><hr></div>
             </div>
 
             <div class="form-row mt-2">
@@ -91,7 +119,7 @@
                 </div>
             </div>
 
-            <div class="form-row mt-2">
+            <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="items_in_box">Combien de piece par carton?</label>
                     <input type="number" name="items_in_box" class="form-control @error('items_in_box') is-invalid @enderror"
@@ -104,7 +132,52 @@
                 </div>
             </div>
 
-            <div class="form-row mt-2">
+            {{-- <div class="row mb-2">
+                <div class="col-3"><hr></div>
+                <div class="col-auto"><b>Les stock minimaux Par Magazin (Faible stock):</b></div>
+                <div class="col"><hr></div>
+            </div>
+
+            <div class="form-group row">
+                <label for="min_quantity_lushi" class="col-3 col-form-label">LUBUMBASHI:</label>
+                <div class="col-4">
+                    <input type="number" name="min_quantity_lushi" class="form-control mx-sm-3 @error('min_quantity_lushi') is-invalid @enderror" id="min_quantity_lushi"
+                        placeholder="Le prix de vente par piece" value="{{ old('min_quantity_lushi') }}">
+                    @error('min_quantity_lushi')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="min_quantity_kolwezi" class="col-3 col-form-label">KOLWEZI:</label>
+                <div class="col-4">
+                    <input type="number" name="min_quantity_kolwezi" class="form-control mx-sm-3 @error('min_quantity_kolwezi') is-invalid @enderror" id="min_quantity_kolwezi"
+                        placeholder="Le prix de vente par piece" value="{{ old('min_quantity_kolwezi') }}">
+                    @error('min_quantity_kolwezi')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div>
+
+            <div class="form-group row">
+                <label for="min_quantity_kilwa" class="col-3 col-form-label">KILWA:</label>
+                <div class="col-4">
+                    <input type="number" name="min_quantity_kilwa" class="form-control mx-sm-3 @error('min_quantity_kilwa') is-invalid @enderror" id="min_quantity_kilwa"
+                        placeholder="Le prix de vente par piece" value="{{ old('min_quantity_kilwa') }}">
+                    @error('min_quantity_kilwa')
+                    <span class="invalid-feedback" role="alert">
+                        <strong>{{ $message }}</strong>
+                    </span>
+                    @enderror
+                </div>
+            </div> --}}
+
+            <div class="form-row">
                 <div class="form-group col-md-6">
                     <label for="min_quantity">Stock Minimal des pieces (Faible stock)</label>
                     <input type="number" name="min_quantity" class="form-control @error('min_quantity') is-invalid @enderror"

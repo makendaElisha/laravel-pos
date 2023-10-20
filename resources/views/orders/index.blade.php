@@ -96,7 +96,11 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <u><h6 class="modal-title" id="billDetailsLabel"><b class="">Saisie Par:</b>: <span id="orderUser"><span></h6></u>
+
+                    <div class="d-flex flex-row justify-content-between">
+                        <u><h6 class="modal-title"><b class="">Client:</b> <span id="orderCustomer"><span></h6></u>
+                        <i><h6 class="modal-title"><b class="">Saisie Par:</b> <span id="orderUser"><span></h6></i>
+                    </div>
 
                     <table class="table" id="data-table">
                         <thead>
@@ -179,7 +183,6 @@
         });
 
         $('#billDetails').on('show.bs.modal', function (event) {
-            console.log('started');
             $this = $(this);
             var button = $(event.relatedTarget); // Button that triggered the modal
             var order = button.data('order');
@@ -187,6 +190,7 @@
             tableBody.empty(); // Clear existing data if any
 
             $(this).find('#orderNumber').text(order.order_number ?? '');
+            $(this).find('#orderCustomer').text(order.customer ?? '');
             $(this).find('#orderUser').text(order.user?.first_name ?? '');
             $(this).find('#orderTotal').text(order.total ?? '');
 
@@ -196,8 +200,8 @@
                     '<td>' + (index + 1) + '</td>' +
                     '<td>' + row.product?.name + '</td>' +
                     '<td>' + row.quantity + '</td>' +
-                    '<td>' + row.product?.sell_price + '</td>' +
-                    '<td>' + Number(row.product?.sell_price) * Number(row.quantity) + '</td>' +
+                    '<td>' + Math.floor(row.price) + '</td>' +
+                    '<td>' + Math.floor(Number(row.price) * Number(row.quantity)) + '</td>' +
                     '</tr>';
 
                 tableBody.append(newRow);

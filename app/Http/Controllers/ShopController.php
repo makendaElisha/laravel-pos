@@ -33,16 +33,16 @@ class ShopController extends Controller
         $shopProducts = $shopProducts->paginate(10);
         $shops = Shop::get();
 
-        foreach ($shopProducts as $key => $shopProd) {
-            $trans = TransferShopProduct::where('shop_id', $shop->id)
-                ->where('product_id', $shopProd->product_id)
-                ->first();
-            if ($trans) {
-                $shopProd->transfer_quantity = $trans->quantity;
-                $shopProd->transfer_id = $trans->id;
-            }
+        // foreach ($shopProducts as $key => $shopProd) {
+        //     $trans = TransferShopProduct::where('shop_id', $shop->id)
+        //         ->where('product_id', $shopProd->product_id)
+        //         ->first();
+        //     if ($trans) {
+        //         $shopProd->transfer_quantity = $trans->quantity;
+        //         $shopProd->transfer_id = $trans->id;
+        //     }
 
-        }
+        // }
 
         return view('shopProducts.index')->with([
             'products' => $shopProducts,

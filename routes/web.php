@@ -24,6 +24,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/', [HomeController::class, 'index'])->name('home');
     Route::get('/settings', [SettingController::class, 'index'])->name('settings.index');
     Route::get('/settings/get-discount', [SettingController::class, 'getDiscount'])->name('settings.get.discount');
+    Route::get('/settings/get-shop/{id}', [SettingController::class, 'getShop'])->name('settings.get.shop');
     Route::post('/settings', [SettingController::class, 'store'])->name('settings.store');
 
     Route::get('shop-items/{shop}/products', [ProductController::class, 'getProducts'])->name('products.index');

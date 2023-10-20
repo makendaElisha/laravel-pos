@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Models\Shop;
 use Illuminate\Http\Request;
 
 class SettingController extends Controller
@@ -32,6 +33,13 @@ class SettingController extends Controller
         return response([
             'discount' => $discount,
             'discount_percent' => $discountPercent,
+        ], 200);
+    }
+
+    public function getShop($id)
+    {
+        return response([
+            'shop' => Shop::find($id),
         ], 200);
     }
 }

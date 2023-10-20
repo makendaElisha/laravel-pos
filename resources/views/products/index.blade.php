@@ -32,7 +32,7 @@
                     <th>Description</th>
                     <th>Stock Dépot</th>
                     <th>Pieces/Carton</th>
-                    <th>Prix</th>
+                    {{-- <th>Prix</th> --}}
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -48,7 +48,7 @@
                         <div>{{$stock}}</div>
                     </td>
                     <td>{{$product->items_in_box}}</td>
-                    <td>{{posprice($product->sell_price)}} F.C</td>
+                    {{-- <td>{{posprice($product->sell_price)}} F.C</td> --}}
                     <td>
                         <a href="{{ route('products.edit', $product) }}" class="btn btn-primary"><i
                                 class="fas fa-edit"></i></a>
@@ -161,7 +161,6 @@
 <script>
     $(document).ready(function () {
         $(document).on('click', '.btn-delete', function () {
-            console.log('will delete');
             $this = $(this);
             const swalWithBootstrapButtons = Swal.mixin({
                 customClass: {
@@ -198,8 +197,6 @@
             var boxes = product.quantity / product.items_in_box;
             var pces = product.quantity % product.items_in_box;
             var info = `${product.items_in_box} Piéce dans chaque Carton`
-
-            console.log('NOW ', product, boxes, pces);
 
             $(this).find('#articleName').text(displayName);
             $(this).find('#boxes').text(boxes ?? '');

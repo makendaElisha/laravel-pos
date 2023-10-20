@@ -20,12 +20,14 @@ class Cart extends Component {
             discount: null,
             discountPercent: null,
             shopId: null,
+            currentShop: null,
             orderToPrint: null,
         };
 
         this.setShop = this.setShop.bind(this);
         this.loadCart = this.loadCart.bind(this);
         this.loadDiscount = this.loadDiscount.bind(this);
+        this.getCurrentShop = this.getCurrentShop.bind(this);
         this.handleOnChangeCode = this.handleOnChangeCode.bind(this);
         this.handleScanCode = this.handleScanCode.bind(this);
         this.handleChangeQty = this.handleChangeQty.bind(this);
@@ -48,6 +50,7 @@ class Cart extends Component {
         this.loadProducts();
         this.loadCustomers();
         this.loadDiscount();
+        this.getCurrentShop();
     }
 
     loadCustomers() {
@@ -69,6 +72,22 @@ class Cart extends Component {
             if (res && res.data) {
                 this.setState({ discount: res.data.discount });
                 this.setState({ discountPercent: res.data.discount_percent });
+            }
+        });
+    }
+
+    getCurrentShop() {
+        const url = window.location.href;
+        const parts = url.split('/');
+        const shopId = parts[parts.length - 2];
+
+        console.log('Will search: ', shopId);
+        axios.get(`/admin/settings/get-shop/${shopId}`).then((res) => {
+            console.log('Will search RES: ', res);
+
+            if (res && res.data) {
+                this.setState({ currentShop: res.data.shop });
+                console.log('FINAL ', this.state.currentShop);
             }
         });
     }
@@ -113,13 +132,17 @@ class Cart extends Component {
         }
     }
     handleChangeQty(product_id, qty) {
-        if (!qty) return;
+        // if (!qty) return;
         const cart = this.state.cart.map((c) => {
             if (c.product_id === product_id) {
                 const maxValue = c.unit === 'pce' ? Number(qty) : Number(qty) * c.product.items_in_box
+
                 if (Number(c.max_qty) >= maxValue) {
                     c.sell_quantity = Number(qty);
                     c.final_quantity = maxValue;
+                } else {
+                    c.sell_quantity = 0;
+                    c.final_quantity = 0;
                 }
             }
             return c;
@@ -152,8 +175,8 @@ class Cart extends Component {
 
     getTotal(cart) {
         const total = cart?.map((c) => c.unit === 'pce' ?
-            c.sell_quantity * c.product.sell_price :
-            c.sell_quantity * c.product.sell_price * c.product.items_in_box
+            c.sell_quantity * c.sell_price :
+            c.sell_quantity * c.sell_price * c.product.items_in_box
         );
 
         return sum(total);
@@ -187,9 +210,11 @@ class Cart extends Component {
         this.setState({ search });
     }
     handleSeach(event) {
-        if (event.keyCode === 13) {
+        setTimeout(() => {
             this.loadProducts(event.target.value);
-        }
+        }, 1000);
+        // if (event.keyCode === 13) {
+        // }
     }
 
     addProductToCart(id) {
@@ -217,13 +242,11 @@ class Cart extends Component {
                     product = {
                         ...product,
                         product_id: product.id,
-                        sell_quantity: 1,
-                        final_quantity: 1,
+                        sell_quantity: null,
+                        final_quantity: null,
                         max_qty: Number(product.quantity),
                         unit: 'pce',
                     };
-
-                    console.log('ADDed ', product);
 
                     this.setState({ cart: [...this.state.cart, product] });
                 }
@@ -248,6 +271,18 @@ class Cart extends Component {
         this.setState({ customer: event });
     }
     handleClickSubmit() {
+        //check for null quantities
+        if (this.state.cart.find((item) => !item.final_quantity)) {
+            Swal.fire({
+                icon: 'error',
+                title: 'La facture contient 1 ou plusieurs quantités non valide',
+                text: 'Les quantités valides sont celles superieur á zero',
+            })
+
+            return;
+        }
+
+
         Swal.fire({
             title: "Veuillez confirmer",
             // input: "text",
@@ -354,7 +389,7 @@ class Cart extends Component {
     }
 
     render() {
-        const { cart, products, customers,customer, code, orderToPrint } = this.state;
+        const { cart, products, customers,customer, code, orderToPrint, currentShop } = this.state;
 
         // Define the styles for the outer div
         const containerStyle = {
@@ -477,8 +512,8 @@ class Cart extends Component {
                                             </td>
                                             <td className="text-right">
                                                 { c.unit === 'pce'
-                                                    ? c.product.sell_price * c.sell_quantity
-                                                    : c.product.sell_price * c.sell_quantity * c.product.items_in_box
+                                                    ? c.sell_price * c.sell_quantity
+                                                    : c.sell_price * c.sell_quantity * c.product.items_in_box
                                                 }
                                                 {" "}
                                                 {window.APP.currency_symbol}
@@ -535,15 +570,21 @@ class Cart extends Component {
                             <div style={containerStyle} className="receipt-container">
                                 <div style={{display: 'flex', justifyContent: 'center', margingBottom: '8px',}}>
                                     <p className="centered"><span style={{ fontWeight: 'bold', fontSize: '16px', }}>3eme ADAM</span>
-                                        <br />Address: Av des Usines
+                                        <br />{ currentShop ? currentShop.address_line_1 : '' }
+                                        <br />{ currentShop ? currentShop.address_line_2 : '' },
+                                        <br />{ currentShop ? currentShop.address_line_3 : '' }
+                                        {/* <br />Address: Av des Usines
                                         <br />C/Lubumbashi, RDC,
-                                        <br />Contacts: +243 995 672 007
+                                        <br />Contacts: +243 995 672 007 */}
                                     </p>
                                 </div>
 
                                 <div style={{display: 'flex', justifyContent: 'space-between',}}>
                                     <div>FACTURE No: { orderToPrint?.order_number }</div>
                                     <div>Date: { new Date().toLocaleDateString('en-GB') }</div>
+                                </div>
+                                <div style={{display: 'flex', justifyContent: 'space-between',}}>
+                                    <div>Client: { orderToPrint?.customer }</div>
                                 </div>
 
                                 <table style={tableStyle}>
@@ -563,8 +604,8 @@ class Cart extends Component {
                                                     <td style={thTdStyle}>{ i+1 }</td>
                                                     <td style={thTdStyle}>{ item.product?.name}</td>
                                                     <td style={thTdStyle}>{ item.quantity }</td>
-                                                    <td style={thTdStyle}>{ item.product?.sell_price }</td>
-                                                    <td style={thTdStyle}> { item.product?.sell_price * item.quantity } </td>
+                                                    <td style={thTdStyle}>{ item.price * 1 }</td>
+                                                    <td style={thTdStyle}> { item.price * item.quantity } </td>
                                                 </tr>
                                             )
                                         })}
@@ -614,7 +655,7 @@ class Cart extends Component {
                                 <h5 className="text-center mb-3 font-weight-bold">[{p.product.code}] { p.product.name }</h5>
                                 <div>Stock Mag: {p.quantity} <i><small>Pce</small></i></div>
                                 <div className="blockquote-footer">(1 CRT = {p.product.items_in_box} Pce)</div>
-                                <div>Prix/pce: {p.product.sell_price} {window.APP.currency_symbol}</div>
+                                <div>Prix/pce: {p.sell_price} {window.APP.currency_symbol}</div>
                             </div>
                         ))}
                     </div>

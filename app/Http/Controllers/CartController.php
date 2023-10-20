@@ -15,7 +15,7 @@ class CartController extends Controller
                 $request->user()->cart()->get()
             );
         }
-        return view('cart.index');
+        return view('cart.index', ['shops' => Shop::get()]);
     }
 
     public function store(Request $request)

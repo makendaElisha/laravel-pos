@@ -55,7 +55,7 @@
                         <div>{{$stock}}</div>
                     </td>
                     <td>{{$shopProd->product->items_in_box}}</td>
-                    <td>{{posprice($shopProd->product->sell_price)}} F.C</td>
+                    <td>{{posprice($shopProd->sell_price)}} F.C</td>
                     <td>
                         @if ($user->is_admin)
                             <button class="btn btn-primary"
@@ -151,8 +151,6 @@
                 current_box = Math.floor(Number(prodShop.quantity) / Number(inbox));
                 current_pce = Number(prodShop.quantity) % Number(inbox);
             }
-
-            console.log('box, pce', current_box, current_pce);
 
             $(this).find('#articleName').text(displayName);
             $(this).find('#articleStock').text(qtyText ?? '');

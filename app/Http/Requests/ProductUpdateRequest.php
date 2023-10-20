@@ -35,7 +35,7 @@ class ProductUpdateRequest extends FormRequest
                 Rule::unique('products')->ignore($product_id),
             ],
             'buy_price' => 'nullable|numeric',
-            'sell_price' => 'required|numeric',
+            'sell_price' => 'nullable|numeric',
             'quantity_pce' => 'nullable|integer',
             'quantity_box' => 'nullable|integer',
             'min_quantity' => 'nullable|integer',

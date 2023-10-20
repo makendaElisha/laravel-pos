@@ -14,6 +14,9 @@ class ShopProduct extends Model
         'shop_id',
         'product_id',
         'quantity',
+        'buy_price',
+        'sell_price',
+        'min_quantity',
     ];
 
     /**

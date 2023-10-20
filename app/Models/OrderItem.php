@@ -20,4 +20,12 @@ class OrderItem extends Model
     {
         return $this->belongsTo(Product::class);
     }
+
+    // Not needed
+    // public function shopProduct()
+    // {
+    //     return ShopProduct::with('product')->where('shop_id', $this->order->shop_id)
+    //         ->where('product_id', $this->product_id)
+    //         ->first();
+    // }
 }

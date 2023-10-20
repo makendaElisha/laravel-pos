@@ -72,7 +72,7 @@ class OrderController extends Controller
         $cart = $request->cart;
         foreach ($cart as $item) {
             $order->items()->create([
-                'price' => $item['unit'] == $item['product']['sell_price'] * $item['final_quantity'],
+                'price' => $item['sell_price'],
                 'quantity' => $item['final_quantity'],
                 'product_id' => $item['product']['id'],
             ]);
