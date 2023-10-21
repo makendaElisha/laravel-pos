@@ -263,6 +263,28 @@ class ProductController extends Controller
             $product->quantity_box = floor($product->quantity / $product->items_in_box);
             $product->quantity_pce = $product->quantity % $product->items_in_box;
         }
+
+        //prices
+        $lushi = Shop::where('name', Shop::LUBUMBASHI)->first();
+        $kolwezi = Shop::where('name', Shop::KOLWEZI)->first();
+        $kilwa = Shop::where('name', Shop::KILWA)->first();
+
+        foreach (Shop::get() as $key => $shop) {
+            $lushiProd = ShopProduct::where('product_id', $product->id)
+                ->where('shop_id', $lushi->id)
+                ->first();
+            $kolweziProd = ShopProduct::where('product_id', $product->id)
+                ->where('shop_id', $kolwezi->id)
+                ->first();
+            $kilwaProd = ShopProduct::where('product_id', $product->id)
+                ->where('shop_id', $kilwa->id)
+                ->first();
+
+            $product->sell_price_lushi = $lushiProd ? $lushiProd->sell_price : 0;
+            $product->sell_price_kolwezi = $kolweziProd ? $kolweziProd->sell_price : 0;
+            $product->sell_price_kilwa = $kilwaProd ? $kilwaProd->sell_price : 0;
+        }
+
         return view('products.edit')->with('product', $product);
     }
 
