@@ -18,7 +18,7 @@ class MovePricesSeeder extends Seeder
         foreach (Product::get() as $stockProduct) {
             if ($stockProduct->sell_price > 0) {
                 $lushi = Shop::where('name', Shop::LUBUMBASHI)->first();
-                $lushiProd = ShopProduct::where('id', $lushi->id)
+                $lushiProd = ShopProduct::where('shop_id', $lushi->id)
                     ->where('product_id', $stockProduct->id)
                     ->first();
 
