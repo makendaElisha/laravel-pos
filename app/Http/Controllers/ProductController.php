@@ -52,7 +52,7 @@ class ProductController extends Controller
     public function getProducts(Request $request, Shop $shop)
     {
         $products = new ShopProduct();
-        $products = ShopProduct::with('product')
+        $products = ShopProduct::has('product')
             ->where('shop_id', $shop->id);
 
         if ($request->search) {
