@@ -99,7 +99,7 @@ class Cart extends Component {
 
         const query = !!search ? `?search=${search}` : "";
         axios.get(`/admin/shop-items/${shopId}/products${query}`).then((res) => {
-            const products = res.data.products.data;
+            const products = res.data.products.data?.filter(prod => prod.product);
             this.setState({ products });
         });
     }
