@@ -73,6 +73,10 @@ class HomeController extends Controller
             $shopProducts = UpdatedStock::with('product')
                 ->where('shop_id', $currShop->id)
                 ->whereNull('seen_by')
+                ->whereHas('product', function ($query) {
+                    // Add a condition to check if the product exists
+                    $query->whereNotNull('id');
+                })
                 ->get();
         }
 
