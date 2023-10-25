@@ -13,12 +13,39 @@
                 <div class="small-box bg-info">
             @endif
                 <div class="inner">
+                    <h4 style="font-weight: bold; padding-bottom: 5px;">Ventes Journalieres:</h4>
+
                     @if ($user->is_admin)
-                        <h3>{{ $dailySells }} F.C</h3>
+                        <table class="table">
+                            <tr>
+                                <td>Total Facture:</td>
+                                <td style="font-weight: bold; font-size: 20px;">{{ number_format($dailySells, 0, ',', '.') }} F.C</td>
+                            </tr>
+                            <tr>
+                                <td>Reduction:</td>
+                                <td style="font-weight: bold; font-size: 20px;">{{ number_format($dailySellsDiscount, 0, ',', '.') }} F.C</td>
+                            </tr>
+                            <tr>
+                                <td>Total Caisse:</td>
+                                <td style="font-weight: bold; font-size: 20px;">{{ number_format($dailySellsAfterDiscount, 0, ',', '.') }} F.C</td>
+                            </tr>
+                        </table>
                     @else
-                        <h3>{{ $allShopSales }} F.C</h3>
+                        <table class="table table-sm">
+                            <tr>
+                                <td>Total Facture:</td>
+                                <td style="font-weight: bold; font-size: 15px;">{{ number_format($allShopSales, 0, ',', '.') }} F.C</td>
+                            </tr>
+                            <tr>
+                                <td>Reduction:</td>
+                                <td style="font-weight: bold; font-size: 15px;">{{ number_format($allShopSalesDiscount, 0, ',', '.') }} F.C</td>
+                            </tr>
+                            <tr>
+                                <td>Total Caisse:</td>
+                                <td style="font-weight: bold; font-size: 15px;">{{ number_format($allShopSalesAfterDiscount, 0, ',', '.') }} F.C</td>
+                            </tr>
+                        </table>
                     @endif
-                    <p>Ventes Journalieres</p>
                 </div>
                 <div class="icon">
                     <i class="ion ion-bag"></i>
@@ -155,10 +182,26 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach ($allDailySales as $shop => $amount)
+                            @foreach ($allDailySales as $shop => $orderQuery)
                             <tr>
-                                <td>{{$shop}}</td>
-                                <td>{{$amount}}</td>
+                                <td class="align-middle" style="font-weight: bold;">{{$shop}}:</td>
+                                {{-- <td>{{$amount}}</td> --}}
+                                <td>
+                                    <table class="table table-sm">
+                                        <tr>
+                                            <td>Total Facture:</td>
+                                            <td style="font-size: 15px;">{{ number_format($orderQuery->sum('total'), 0, ',', '.') }} F.C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Reduction:</td>
+                                            <td style="font-size: 15px;">{{ number_format($orderQuery->sum('discount'), 0, ',', '.') }} F.C</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Total Caisse:</td>
+                                            <td style="font-size: 15px;">{{ number_format($orderQuery->sum('total') - $orderQuery->sum('discount'), 0, ',', '.') }} F.C</td>
+                                        </tr>
+                                    </table>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>

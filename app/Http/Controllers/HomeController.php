@@ -40,16 +40,20 @@ class HomeController extends Controller
         $customers_count = Customer::count();
 
         $dailySells = Order::where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
+        $dailySellsDiscount = Order::where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('discount');
+        $dailySellsAfterDiscount = $dailySells - $dailySellsDiscount;
 
         $allDailySales = [
-            Shop::LUBUMBASHI => $lushi ? Order::where('shop_id', $lushi->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total') : '',
-            Shop::KILWA => $kolwezi ? Order::where('shop_id', $kilwa->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total') : '',
-            Shop::KOLWEZI => $kilwa ? Order::where('shop_id', $kolwezi->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total') : '',
+            Shop::LUBUMBASHI => $lushi ? Order::where('shop_id', $lushi->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00') : '',
+            Shop::KILWA => $kolwezi ? Order::where('shop_id', $kilwa->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00') : '',
+            Shop::KOLWEZI => $kilwa ? Order::where('shop_id', $kolwezi->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00') : '',
         ];
 
         $lowStockProducts = Product::whereColumn('quantity', '<', 'min_quantity')->get();
 
         $allShopSales = 0;
+        $allShopSalesDiscount = 0;
+        $allShopSalesAfterDiscount = 0;
         $shopProducts = [];
         if (!$user->is_admin) {
             $currShop = Shop::where('name', $user->shop_name)->first();
@@ -68,6 +72,8 @@ class HomeController extends Controller
                 $prod->shop_quantity = $shpProds->where('product_id', $prod->id)->first()->quantity;
             }
             $allShopSales = Order::where('shop_id', $currShop->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('total');
+            $allShopSalesDiscount = Order::where('shop_id', $currShop->id)->where('created_at', '>=', date('Y-m-d').' 00:00:00')->sum('discount');
+            $allShopSalesAfterDiscount = $allShopSales - $allShopSalesDiscount;
 
             // updated stock
             $shopProducts = UpdatedStock::with('product')
@@ -87,7 +93,11 @@ class HomeController extends Controller
             'user' => $user,
             'shopProducts' => $shopProducts,
             'dailySells' => $dailySells,
+            'dailySellsDiscount' => $dailySellsDiscount,
+            'dailySellsAfterDiscount' => $dailySellsAfterDiscount,
             'allShopSales' => $allShopSales,
+            'allShopSalesDiscount' => $allShopSalesDiscount,
+            'allShopSalesAfterDiscount' => $allShopSalesAfterDiscount,
             'allDailySales' => $allDailySales,
             'dailyBills' => $dailyBills,
             'orders_count' => $orders->count(),
