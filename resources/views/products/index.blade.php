@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Product List')
-@section('content-header', 'Product List')
+@section('content-header', 'Grand dépot Lubumbashi')
 @section('content-actions')
 <a href="{{route('products.create')}}" class="btn btn-primary">Create Product</a>
 @endsection
@@ -23,6 +23,10 @@
                         </div>
                     </div>
                 </form>
+
+            </div>
+            <div class="col-md-2">
+                <a href="{{route('products.list.pdf')}}" target="_blank"><button class="btn btn-primary" type="submit">List PDF</button></a>
             </div>
         </div>
         <table class="table">

@@ -37,6 +37,10 @@ class OrderController extends Controller
             $orders = $orders->where('created_at', '<=', $request->end_date . ' 23:59:59');
         }
 
+        if($request->search) {
+            $orders = $orders->where('order_number', $request->search);
+        }
+
         $total = $orders->sum('paid');
 
         $orders = $orders->with(['items', 'payments', 'user'])->latest()->paginate(10);

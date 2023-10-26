@@ -7,6 +7,7 @@ use App\Http\Controllers\OrderController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ShopController;
+use App\Http\Controllers\PDFController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,4 +49,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     //Dashboard
     Route::post('/{ids}', [HomeController::class, 'seen'])->name('home.seen');
+
+    //PDF
+    Route::get('pdf/store/generate-pdf', [PDFController::class, 'generatePDF'])->name('products.list.pdf');
 });
