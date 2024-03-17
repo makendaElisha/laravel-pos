@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\OrderStoreRequest;
 use App\Models\Order;
+use App\Models\OrderItem;
 use App\Models\Setting;
 use App\Models\Shop;
 use App\Models\ShopProduct;
@@ -15,7 +16,7 @@ class OrderController extends Controller
 {
     public function index(Request $request) {
         $user = Auth()->user();
-        $orders = Order::with(['items.product', 'user']);
+        $orders = Order::with(['items.product', 'user'])->withTrashed();
         $shops = Shop::get();
 
         $shopId = '0';
@@ -127,6 +128,27 @@ class OrderController extends Controller
 
         $order->items()->delete();
         $order->delete();
+
+        return redirect()->route('orders.index');
+    }
+
+    public function destroySingle(Order $order, OrderItem $orderItem)
+    {
+        $itemAmount = $orderItem->price;
+        $itemQuantity = $orderItem->quantity;
+
+        if ($orderItem->delete()) {
+            $order->total = $order->total - $itemAmount;
+            $order->paid = $order->paid - $itemAmount;
+            $order->save();
+
+            // Restore stock
+            $shopProd = ShopProduct::where('shop_id', $order->shop_id)
+                ->where('product_id', $orderItem->product_id)
+                ->first();
+            $shopProd->quantity += (int) $itemQuantity;
+            $shopProd->save();
+        }
 
         return redirect()->route('orders.index');
     }

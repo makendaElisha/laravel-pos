@@ -38,6 +38,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('customers', CustomerController::class);
     Route::post('/cart-orders', [OrderController::class, 'storeCart'])->name('shop.cart.store');
     Route::resource('orders', OrderController::class);
+    Route::post('/orders/{order}/item/{orderItem}/delete', [OrderController::class, 'destroySingle']);
 
     //To be removed
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
