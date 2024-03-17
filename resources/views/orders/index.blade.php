@@ -190,6 +190,7 @@
                     $.post($this.data('url'), {_method: 'DELETE', _token: '{{csrf_token()}}'}, function (res) {
                         $this.closest('tr').fadeOut(500, function () {
                             $(this).remove();
+                            location.reload();
                         })
                     })
                 }
@@ -222,6 +223,7 @@
                     $.post(`/admin/orders/${orderId}/item/${itemId}/delete`, {_token: '{{csrf_token()}}'}, function (res) {
                         $this.closest('tr').fadeOut(500, function () {
                             $(this).remove();
+                            location.reload();
                         })
                     })
                 }
