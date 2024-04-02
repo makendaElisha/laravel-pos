@@ -159,10 +159,14 @@ class PDFController extends Controller
 
         // Loop through products and add rows to the table
         foreach ($products as $shopProduct) {
+            $code = $shopProduct->product->code ?? '';
+            $name = $shopProduct->product->name ?? '';
+            $quantity = $shopProduct->product->quantity ?? '';
+
             $html .= '<tr>
-                        <td>' . $shopProduct->product->code . '</td>
-                        <td colspan="2">' . $shopProduct->product->name . '</td>
-                        <td>' . $shopProduct->product->quantity . '</td>
+                        <td>' . $code . '</td>
+                        <td colspan="2">' . $name . '</td>
+                        <td>' . $quantity . '</td>
                     </tr>';
         }
 
