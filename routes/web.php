@@ -39,6 +39,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('/cart-orders', [OrderController::class, 'storeCart'])->name('shop.cart.store');
     Route::resource('orders', OrderController::class);
     Route::post('/orders/{order}/item/{orderItem}/delete', [OrderController::class, 'destroySingle']);
+    Route::get('/orders/all/deleted', [OrderController::class, 'deletedOrders'])->name('orders.deleted.index');
 
     //To be removed
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -53,4 +54,5 @@ Route::prefix('admin')->middleware('auth')->group(function () {
 
     //PDF
     Route::get('pdf/store/generate-pdf', [PDFController::class, 'generatePDF'])->name('products.list.pdf');
+    Route::get('pdf/store/generate-pdf/{shop}', [PDFController::class, 'generateShopPDF'])->name('products.shop.list.pdf');
 });

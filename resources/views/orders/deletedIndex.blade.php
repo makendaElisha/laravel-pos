@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Factures')
-@section('content-header', 'List Des Factures')
+@section('content-header', 'List Des Factures Supprimées')
 @section('content-actions')
 {{-- <a href="{{route('shop.cart.index', $shop->id)}}" class="btn btn-success">
     <i class="fas fa-cart-plus pr-1"></i>Facturation
@@ -55,11 +55,7 @@
             </thead>
             <tbody>
                 @foreach ($orders as $order)
-                @if ($order->deleted_at)
-                <tr class="text-red text-bold" style="text-decoration: line-through">
-                @else
                 <tr>
-                @endif
                     <td>{{$order->order_number}}</td>
                     <td>{{$order->customer}}</td>
                     <td>{{ number_format($order->paid, 0, ',', '.') }} {{ config('settings.currency_symbol') }}</td>
@@ -71,16 +67,6 @@
                             data-placement="bottom" title="Voir Facture">
                             <i class="fas fa-info"></i>
                         </button>
-                        {{-- <button class="ml-2 btn btn-primary re-print" data-url="{{route('orders.destroy', $order)}}"
-                            data-toggle="tooltip" data-placement="bottom" title="Imprimer"><i
-                            class="fas fa-print"></i>Print
-                        </button> --}}
-                        @if ($user->is_admin && !$order->deleted_at)
-                        <button class="ml-2 btn btn-danger btn-delete" data-url="{{route('orders.destroy', $order)}}"
-                            data-toggle="tooltip" data-placement="bottom" title="Supprimer"><i
-                            class="fas fa-trash"></i>
-                        </button>
-                        @endif
                     </td>
                 </tr>
                 @endforeach
@@ -209,39 +195,6 @@
             })
         });
 
-        $(document).on('click', '.btn-delete-single', function () {
-            $this = $(this);
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false
-                })
-
-                swalWithBootstrapButtons.fire({
-                title: 'Supprimer Cet Article?',
-                text: "Voulez-vous vraiment supprimer cet article de la facture?",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonText: 'Oui',
-                cancelButtonText: 'No',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    var itemId = $(this).data('itemid');
-                    var orderId = $(this).data('orderid');
-                    console.log("VIRTUAL ", itemId, orderId)
-                    $.post(`/admin/orders/${orderId}/item/${itemId}/delete`, {_token: '{{csrf_token()}}'}, function (res) {
-                        $this.closest('tr').fadeOut(500, function () {
-                            $(this).remove();
-                            location.reload();
-                        })
-                    })
-                }
-            })
-        });
-
         $('#billDetails').on('show.bs.modal', function (event) {
             $this = $(this);
             var button = $(event.relatedTarget); // Button that triggered the modal
@@ -268,87 +221,6 @@
                 tableBody.append(newRow);
             });
         });
-
-        $(document).on('click', '.re-print', function () {
-            $this = $(this);
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false
-                })
-
-                swalWithBootstrapButtons.fire({
-                title: 'Imprimer!',
-                text: "Voulez-vous re-imprimer cette facture?",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Oui, Imprimer',
-                cancelButtonText: 'Annuler',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    handlePrinting();
-                }
-            })
-        });
-
-        function handlePrinting() {
-
-            console.log('IMPRIMONSS')
-
-            // Define your CSS styles as a string
-        const styles = `
-            /* Define A5 page size for printing */
-            @page {
-                size: A5;
-                margin: 0;
-            }
-
-            /* Define the content area on the A5 page */
-            @media print {
-                html, body {
-                    width: 110mm; /* A5 width in millimeters */
-                    height: 210mm; /* A5 height in millimeters */
-                    margin: 0;
-                }
-                body {
-                    padding: 1mm; /* Add some padding to fit content within A5 */
-                }
-            }
-
-            /* Styles for the <div> you want to print */
-            .printable-content {
-                width: 100mm; /* Adjust the width to fit content within A5 */
-                height: 190mm; /* Adjust the height to fit content within A5 */
-                background-color: white; /* Ensure a white background for printing */
-                /* Add other styles as needed */
-            }
-        `;
-
-        // Get the iframe element
-        const iframe = document.getElementById('ifmcontentstoprint');
-
-        // Get the iframe's document
-        const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
-
-        // Create a <style> element and append the CSS styles
-        const styleElement = iframeDoc.createElement('style');
-        styleElement.innerHTML = styles;
-        iframeDoc.head.appendChild(styleElement);
-
-        // Trigger the print dialog for the iframe's content
-        var content = document.getElementById("divcontents");
-        var pri = iframe.contentWindow;
-        pri.document.open();
-        pri.document.write(content.innerHTML);
-        pri.document.close();
-        pri.focus();
-        pri.print();
-        // iframe.contentWindow.print();
-        }
-
     });
 </script>
 @endsection

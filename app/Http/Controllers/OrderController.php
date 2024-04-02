@@ -16,7 +16,7 @@ class OrderController extends Controller
 {
     public function index(Request $request) {
         $user = Auth()->user();
-        $orders = Order::with(['items.product', 'user'])->withTrashed();
+        $orders = Order::with(['items.product', 'user']);
         $shops = Shop::get();
 
         $shopId = '0';
@@ -51,6 +51,46 @@ class OrderController extends Controller
         // })->sum();
 
         return view('orders.index', compact('orders',
+            'user',
+            'total',
+            'shopId',
+            'shops'
+        ));
+    }
+
+    public function deletedOrders(Request $request) {
+        $user = Auth()->user();
+        $orders = Order::with(['items.product', 'user'])->onlyTrashed();
+        $shops = Shop::get();
+
+        $shopId = '0';
+        if (!$user->is_admin) {
+            $shopId = Shop::where('name', $user->shop_name)->first()->id;
+            $orders = $orders->where('shop_id', $shopId);
+        }
+
+        if( $user->is_admin && $request->shop) {
+            $orders = $orders->where('shop_id', $request->shop);
+            $shopId = $request->shop;
+        }
+
+        if($request->start_date) {
+            $orders = $orders->where('created_at', '>=', $request->start_date);
+        }
+
+        if($request->end_date) {
+            $orders = $orders->where('created_at', '<=', $request->end_date . ' 23:59:59');
+        }
+
+        if($request->search) {
+            $orders = $orders->where('order_number', $request->search);
+        }
+
+        $total = $orders->sum('paid');
+
+        $orders = $orders->with(['items', 'payments', 'user'])->latest()->paginate(10);
+
+        return view('orders.deletedIndex', compact('orders',
             'user',
             'total',
             'shopId',
@@ -138,8 +178,8 @@ class OrderController extends Controller
         $itemQuantity = $orderItem->quantity;
 
         if ($orderItem->delete()) {
-            $order->total = $order->total - $itemAmount;
-            $order->paid = $order->paid - $itemAmount;
+            $order->total = $order->total - $itemAmount * $itemQuantity;
+            $order->paid = $order->paid - $itemAmount * $itemQuantity;
             $order->save();
 
             // Restore stock

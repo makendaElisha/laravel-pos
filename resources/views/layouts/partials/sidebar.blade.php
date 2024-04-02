@@ -79,6 +79,12 @@
                         <i class="nav-icon fas fa-cart-plus"></i>
                         <p>Factures</p>
                     </a>
+                </li>
+                <li class="nav-item">
+                    <a href="{{ route('orders.deleted.index') }}" class="nav-link {{ activeSegment('deleted') }}">
+                        <i class="nav-icon fas fa-cart-plus text-danger"></i>
+                        <p class="text-danger">Factures Supprimées</p>
+                    </a>
                 </li>{{--
                 <li class="nav-item has-treeview">
                     <a href="{{ route('customers.index') }}" class="nav-link {{ activeSegment('customers') }}">

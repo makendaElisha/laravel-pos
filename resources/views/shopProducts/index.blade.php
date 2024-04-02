@@ -30,6 +30,9 @@
                     </div>
                 </form>
             </div>
+            <div class="col-md-2">
+                <a href="{{route('products.shop.list.pdf', ["shop" => $shop->id])}}" target="_blank"><button class="btn btn-primary" type="submit">List PDF Shop</button></a>
+            </div>
         </div>
         <table class="table">
             <thead>
