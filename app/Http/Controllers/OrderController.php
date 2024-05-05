@@ -178,8 +178,12 @@ class OrderController extends Controller
         $itemQuantity = $orderItem->quantity;
 
         if ($orderItem->delete()) {
-            $order->total = $order->total - $itemAmount * $itemQuantity;
-            $order->paid = $order->paid - $itemAmount * $itemQuantity;
+            $newTotal= $order->total - $itemAmount * $itemQuantity;
+            $discount = $this->getDiscount($newTotal);
+
+            $order->total = $newTotal;
+            $order->paid = $newTotal - $discount;
+            $order->discount = $discount;
             $order->save();
 
             // Restore stock
@@ -191,5 +195,17 @@ class OrderController extends Controller
         }
 
         return redirect()->route('orders.index');
+    }
+
+    public function getDiscount($total) {
+        $discountAmount = 0;
+        $dbDiscount = (Setting::where('key', 'min_discount_amount')->first())->value ?? null;
+        $dbPercent = (Setting::where('key', 'discount_percentage')->first())->value ?? null;
+
+        if ($dbDiscount && $dbPercent && $total >= $dbDiscount) {
+            $discountAmount = $total * $dbPercent / 100;
+        }
+
+        return $discountAmount ?? 0;
     }
 }

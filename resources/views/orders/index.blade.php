@@ -67,7 +67,7 @@
                     <td>{{$order->created_at}}</td>
                     <td>
                         <button class="ml-1 btn btn-primary btinformation" data-toggle="modal"
-                            data-target="#billDetails" data-order="{{ $order }}" data-toggle="tooltip"
+                            data-target="#billDetails" data-order="{{ $order }}" data-isadmin="{{ $user->is_admin }}" data-toggle="tooltip"
                             data-placement="bottom" title="Voir Facture">
                             <i class="fas fa-info"></i>
                         </button>
@@ -149,9 +149,27 @@
                                 <td></td>
                                 <td></td>
                                 <td>
-                                    <h5><b>Total:</b></h5>
+                                    <h6><b>Total:</b></h6>
                                 <td>
-                                    <h5><b id="orderTotal"></b></h5>
+                                    <h6><b id="orderTotal"></b></h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <h6><b>Reduction:</b></h6>
+                                <td>
+                                    <h6><b id="orderDiscount"> FC</b></h6>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                                <td>
+                                    <h5><b>Montant payé:</b></h5>
+                                <td>
+                                    <h5><b id="orderPaid"></b> <i>FC</i></h5>
                                 </td>
                             </tr>
                         </thead>
@@ -246,6 +264,7 @@
             $this = $(this);
             var button = $(event.relatedTarget); // Button that triggered the modal
             var order = button.data('order');
+            var isadmin = button.data('isadmin');
             var tableBody = $('#data-table tbody');
             tableBody.empty(); // Clear existing data if any
 
@@ -253,17 +272,26 @@
             $(this).find('#orderCustomer').text(order.customer ?? '');
             $(this).find('#orderUser').text(order.user?.first_name ?? '');
             $(this).find('#orderTotal').text(order.total ?? '');
+            $(this).find('#orderDiscount').text(order.discount ?? '');
+            $(this).find('#orderPaid').text(order.paid ?? '');
 
 
             $.each(order?.items, function (index, row) {
                 var newRow = '<tr>' +
-                    '<td>' + (index + 1) + '</td>' +
+                    '<td>' + (isadmin) + '</td>' +
                     '<td>' + row.product?.name + '</td>' +
                     '<td>' + row.quantity + '</td>' +
                     '<td>' + Math.floor(row.price) + '</td>' +
-                    '<td>' + Math.floor(Number(row.price) * Number(row.quantity)) + '</td>' +
-                    '<td><button class="ml-2 btn btn-danger btn-delete-single" data-itemId="' + row.id + '" data-orderId="' + order.id +'">Delete</button></td>' +
-                    '</tr>';
+                    '<td>' + Math.floor(Number(row.price) * Number(row.quantity)) + '</td>';
+
+                    // Check if admin for delete action
+                    if (isadmin) {
+                        newRow += '<td><button class="ml-2 btn btn-danger btn-delete-single" data-itemId="' + row.id + '" data-orderId="' + order.id +'">Delete</button></td>';
+                    } else {
+                        newRow += '<td></td>';
+                    }
+
+                    newRow += '</tr>';
 
                 tableBody.append(newRow);
             });
