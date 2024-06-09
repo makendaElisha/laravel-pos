@@ -40,6 +40,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('orders', OrderController::class);
     Route::post('/orders/{order}/item/{orderItem}/delete', [OrderController::class, 'destroySingle']);
     Route::get('/orders/all/deleted', [OrderController::class, 'deletedOrders'])->name('orders.deleted.index');
+    Route::get('/current/reprint/order/{order}', [OrderController::class, 'getOrderContent'])->name('reprint.getOrderContent');
 
     //To be removed
     Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
@@ -48,6 +49,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::post('/cart/change-qty', [CartController::class, 'changeQty']);
     Route::delete('/cart/delete', [CartController::class, 'delete']);
     Route::delete('/cart/empty', [CartController::class, 'empty']);
+    Route::get('/reprint/order/{order}', [CartController::class, 'reprint'])->name('reprint.shop.order');
 
     //Dashboard
     Route::post('/{ids}', [HomeController::class, 'seen'])->name('home.seen');
@@ -55,4 +57,5 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     //PDF
     Route::get('pdf/store/generate-pdf', [PDFController::class, 'generatePDF'])->name('products.list.pdf');
     Route::get('pdf/store/generate-pdf/{shop}', [PDFController::class, 'generateShopPDF'])->name('products.shop.list.pdf');
+    Route::get('pdf/store/generate-bills-pdf', [PDFController::class, 'generateBillsPDF'])->name('orders.list.pdf');
 });

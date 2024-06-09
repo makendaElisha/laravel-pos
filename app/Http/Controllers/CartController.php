@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use App\Models\Product;
 use App\Models\Shop;
 use Illuminate\Http\Request;
@@ -90,5 +91,10 @@ class CartController extends Controller
         $request->user()->cart()->detach();
 
         return response('', 204);
+    }
+
+    public function reprint(Request $request, Shop $shop, Order $order)
+    {
+        return view('cart.reprint', ['shops' => Shop::get()]);
     }
 }

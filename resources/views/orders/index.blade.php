@@ -35,8 +35,12 @@
                         <div class="col-md-2">
                             <input type="date" name="end_date" class="form-control" value="{{request('end_date')}}" />
                         </div>
-                        <div class="col-md-2">
+                        <div class="row col-md-2">
                             <button class="btn btn-primary" type="submit">Filtrer</button>
+                            <div class="col-md-2">
+                                <a href="{{route('orders.list.pdf')}}?{{ request()->getQueryString() }}" target="_blank"><button class="btn btn-success" type="button">Imprimer List</button></a>
+                            </div>
+                            {{-- <button class="btn btn-secondary" type="submit">Telecharger PDF</button> --}}
                         </div>
                     </div>
                 </form>
@@ -71,6 +75,13 @@
                             data-placement="bottom" title="Voir Facture">
                             <i class="fas fa-info"></i>
                         </button>
+
+                        <a href="{{route('reprint.shop.order', ['order' => $order->id])}}">
+                        <button class="ml-1 btn btn-primary btinformation" data-toggle="modal">
+                            Imprimer
+                        </button>
+                        </a>
+
                         {{-- <button class="ml-2 btn btn-primary re-print" data-url="{{route('orders.destroy', $order)}}"
                             data-toggle="tooltip" data-placement="bottom" title="Imprimer"><i
                             class="fas fa-print"></i>Print
@@ -295,31 +306,6 @@
 
                 tableBody.append(newRow);
             });
-        });
-
-        $(document).on('click', '.re-print', function () {
-            $this = $(this);
-            const swalWithBootstrapButtons = Swal.mixin({
-                customClass: {
-                    confirmButton: 'btn btn-success',
-                    cancelButton: 'btn btn-danger'
-                },
-                buttonsStyling: false
-                })
-
-                swalWithBootstrapButtons.fire({
-                title: 'Imprimer!',
-                text: "Voulez-vous re-imprimer cette facture?",
-                icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: 'Oui, Imprimer',
-                cancelButtonText: 'Annuler',
-                reverseButtons: true
-                }).then((result) => {
-                if (result.value) {
-                    handlePrinting();
-                }
-            })
         });
 
         function handlePrinting() {

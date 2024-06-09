@@ -145,6 +145,13 @@ class OrderController extends Controller
         ], 200);
     }
 
+    public function getOrderContent(Order $order)
+    {
+        return response()->json([
+            'order' => Order::with(['items.product', 'user'])->where('id', $order->id)->first(),
+        ], 200);
+    }
+
     public function destroy(Order $order)
     {
         //Return stock
@@ -156,14 +163,14 @@ class OrderController extends Controller
             $shopProd->quantity += (int) $orderItem->quantity;
             $shopProd->save();
 
-            //update stock mouvement
-            StockMouvement::create([
-                'product_id' => $shopProd->id,
-                'type' => StockMouvement::CANCEL_BILL,
-                'quantity' => $orderItem->quantity,
-                'user_id' => Auth()->user()->id,
-                'shop_id' => $order->shop_id,
-            ]);
+            //update stock mouvement <> Removed because error deleting bill
+            // StockMouvement::create([
+            //     'product_id' => $shopProd->id ?? null,
+            //     'type' => StockMouvement::CANCEL_BILL,
+            //     'quantity' => $orderItem->quantity,
+            //     'user_id' => Auth()->user()->id,
+            //     'shop_id' => $order->shop_id,
+            // ]);
         }
 
         $order->items()->delete();
