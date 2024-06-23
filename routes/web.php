@@ -32,6 +32,8 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::resource('products', ProductController::class);
     Route::get('product/{product}/assign-shop', [ProductController::class, 'assignProducts'])->name('assign.products');
     Route::post('product/assign-shop', [ProductController::class, 'saveAssignProducts'])->name('save.assign.products');
+    Route::get('/transfer/list', [ProductController::class, 'shopsStockMovements'])->name('shops.stock.movements');
+    Route::get('/historic/articles', [ProductController::class, 'stockMouvement'])->name('article.global.movements');
 
 
     Route::get('/shop/{shop}/products', [ShopController::class, 'index'])->name('shop.products.index');
@@ -52,7 +54,7 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::get('/reprint/order/{order}', [CartController::class, 'reprint'])->name('reprint.shop.order');
 
     //Dashboard
-    Route::post('/{ids}', [HomeController::class, 'seen'])->name('home.seen');
+    Route::post('/{id}', [HomeController::class, 'seen'])->name('home.seen');
 
     //PDF
     Route::get('pdf/store/generate-pdf', [PDFController::class, 'generatePDF'])->name('products.list.pdf');

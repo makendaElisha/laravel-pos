@@ -9,6 +9,7 @@ use App\Models\Setting;
 use App\Models\Shop;
 use App\Models\ShopProduct;
 use App\Models\StockMouvement;
+use App\Models\UpdatedStock;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -154,26 +155,30 @@ class OrderController extends Controller
 
     public function destroy(Order $order)
     {
-        //Return stock
-        foreach ($order->items as $orderItem) {
-            $shopProd = ShopProduct::where('shop_id', $order->shop_id)
-                ->where('product_id', $orderItem->product_id)
-                ->first();
+        $keepOrderItems = $order->items;
 
-            $shopProd->quantity += (int) $orderItem->quantity;
-            $shopProd->save();
+        if ($order->items()->delete()) {
 
-            //update stock mouvement <> Removed because error deleting bill
-            // StockMouvement::create([
-            //     'product_id' => $shopProd->id ?? null,
-            //     'type' => StockMouvement::CANCEL_BILL,
-            //     'quantity' => $orderItem->quantity,
-            //     'user_id' => Auth()->user()->id,
-            //     'shop_id' => $order->shop_id,
-            // ]);
+            //Return stock
+            foreach ($keepOrderItems as $orderItem) {
+                $shopProd = ShopProduct::where('shop_id', $order->shop_id)
+                    ->where('product_id', $orderItem->product_id)
+                    ->first();
+
+                $shopProd->quantity += (int) $orderItem->quantity;
+                $shopProd->save();
+
+                // update stock mouvement
+                StockMouvement::create([
+                    'product_id' => $shopProd->product_id ?? null,
+                    'type' => StockMouvement::CANCEL_BILL,
+                    'quantity' => $orderItem->quantity,
+                    'user_id' => Auth()->user()->id,
+                    'shop_id' => $order->shop_id,
+                ]);
+            }
         }
 
-        $order->items()->delete();
         $order->delete();
 
         return redirect()->route('orders.index');
@@ -199,6 +204,14 @@ class OrderController extends Controller
                 ->first();
             $shopProd->quantity += (int) $itemQuantity;
             $shopProd->save();
+
+            StockMouvement::create([
+                'product_id' => $shopProd->product_id ?? null,
+                'type' => StockMouvement::CANCEL_BILL,
+                'quantity' => $itemQuantity,
+                'user_id' => Auth()->user()->id,
+                'shop_id' => $order->shop_id,
+            ]);
         }
 
         return redirect()->route('orders.index');

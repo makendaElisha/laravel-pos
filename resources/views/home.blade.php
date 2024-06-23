@@ -125,6 +125,7 @@
                                     <th>Code</th>
                                     <th>Nom</th>
                                     <th>Quantité</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -142,15 +143,16 @@
                                         <td>
                                             <div>{{$stock}}</div>
                                         </td>
+                                        <td>
+                                            <form method="POST" action="{{ route('home.seen', ['id' => $shopProd->id]) }}">
+                                                @csrf
+                                                <button type="submit">Accuser reception</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>
                         </table>
-
-                        <form method="POST" action="{{ route('home.seen', ['ids' => json_encode($ids)]) }}">
-                            @csrf
-                            <button type="submit">Accuser reception</button>
-                        </form>
                     </div>
                     <div class="icon">
                         <i class="ion ion-pie-graph"></i>

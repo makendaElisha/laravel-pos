@@ -99,6 +99,18 @@
                     </a>
                 </li> --}}
                 @if ($user->is_admin)
+                    <li class="nav-item">
+                        <a href="{{ route('shops.stock.movements') }}" class="nav-link {{ activeSegment('transfer') }}">
+                            <i class="nav-icon fas fa-truck"></i>
+                            <p>Articles reçu magasins</p>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{{ route('article.global.movements') }}" class="nav-link {{ activeSegment('historic') }}">
+                            <i class="nav-icon fas fa-history"></i>
+                            <p>Articles Mouvements Historic</p>
+                        </a>
+                    </li>
                     <li class="nav-item has-treeview">
                         <a href="{{ route('settings.index') }}" class="nav-link {{ activeSegment('settings') }}">
                             <i class="nav-icon fas fa-cogs"></i>

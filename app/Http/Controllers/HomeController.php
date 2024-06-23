@@ -119,16 +119,12 @@ class HomeController extends Controller
     }
 
     public function seen(Request $request) {
-        $ids = $request->ids;
+        $id = $request->id;
 
-        if ($ids) {
-            $ids = json_decode($ids);
-
-            foreach ($ids as $id) {
-                $record = UpdatedStock::where('id', $id)->first();
-                $record->seen_by = Auth()->user()->id;
-                $record->save();
-            }
+        if ($id) {
+            $record = UpdatedStock::where('id', $id)->first();
+            $record->seen_by = Auth()->user()->id;
+            $record->save();
         }
         return redirect()->back();
     }

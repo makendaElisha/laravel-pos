@@ -26,4 +26,14 @@ class StockMouvement extends Model
         'shop_id',
         'user_id',
     ];
+
+    public function shop()
+    {
+        return $this->belongsTo(Shop::class);
+    }
+
+    public function product()
+    {
+        return $this->belongsTo(Product::class);
+    }
 }

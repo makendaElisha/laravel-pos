@@ -372,4 +372,86 @@ class ProductController extends Controller
             'success' => true
         ]);
     }
+
+    public function shopsStockMovements(Request $request) {
+        $user = Auth()->user();
+        $movements = UpdatedStock::with(['product', 'shop']);
+        $shops = Shop::get();
+
+        $shopId = '0';
+        if (!$user->is_admin) {
+            $shopId = Shop::where('name', $user->shop_name)->first()->id;
+            $movements = $movements->where('shop_id', $shopId);
+        }
+
+        if( $user->is_admin && $request->shop) {
+            $movements = $movements->where('shop_id', $request->shop);
+            $shopId = $request->shop;
+        }
+
+        if($request->start_date) {
+            $movements = $movements->where('created_at', '>=', $request->start_date);
+        }
+
+        if($request->end_date) {
+            $movements = $movements->where('created_at', '<=', $request->end_date . ' 23:59:59');
+        }
+
+        if($request->code) {
+            $code = $request->code;
+
+            $movements = $movements->whereHas('product', function($q) use($code) {
+                $q->where('code', '=', $code);
+            });
+        }
+
+        $movements = $movements->with(['product', 'shop'])->latest()->paginate(10);
+
+        return view('products.movements', compact('movements',
+            'user',
+            'shopId',
+            'shops'
+        ));
+    }
+
+    public function stockMouvement(Request $request) {
+        $user = Auth()->user();
+        $movements = StockMouvement::with(['product', 'shop']);
+        $shops = Shop::get();
+
+        $shopId = '0';
+        if (!$user->is_admin) {
+            $shopId = Shop::where('name', $user->shop_name)->first()->id;
+            $movements = $movements->where('shop_id', $shopId);
+        }
+
+        if( $user->is_admin && $request->shop) {
+            $movements = $movements->where('shop_id', $request->shop);
+            $shopId = $request->shop;
+        }
+
+        if($request->start_date) {
+            $movements = $movements->where('created_at', '>=', $request->start_date);
+        }
+
+        if($request->end_date) {
+            $movements = $movements->where('created_at', '<=', $request->end_date . ' 23:59:59');
+        }
+
+        if($request->code) {
+            $code = $request->code;
+
+            $movements = $movements->whereHas('product', function($q) use($code) {
+                $q->where('code', '=', $code);
+            });
+        }
+
+        $movements = $movements->with(['product', 'shop'])->latest()->paginate(20);
+
+        return view('products.history', compact('movements',
+            'user',
+            'shopId',
+            'shops'
+        ));
+    }
 }
