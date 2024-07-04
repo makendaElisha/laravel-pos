@@ -127,9 +127,14 @@ class OrderController extends Controller
                 ->where('product_id', $item['product']['id'])
                 ->first();
 
+            $qtyBefore = $shopProd->quantity;
+            $qtyAfter = null;
+
             // Deduct form shop
             $shopProd->quantity -= (int) $item['final_quantity'];
             $shopProd->save();
+
+            $qtyAfter = $shopProd->quantity;
 
             //update stock mouvement
             StockMouvement::create([
@@ -138,6 +143,8 @@ class OrderController extends Controller
                 'quantity' => $item['final_quantity'],
                 'user_id' => Auth()->user()->id,
                 'shop_id' => $request->shop_id,
+                'quantity_before' => $qtyBefore,
+                'quantity_after' => $qtyAfter,
             ]);
         }
 
@@ -165,8 +172,13 @@ class OrderController extends Controller
                     ->where('product_id', $orderItem->product_id)
                     ->first();
 
+                $qtyBefore = $shopProd->quantity;
+                $qtyAfter = null;
+
                 $shopProd->quantity += (int) $orderItem->quantity;
                 $shopProd->save();
+
+                $qtyAfter = $shopProd->quantity;
 
                 // update stock mouvement
                 StockMouvement::create([
@@ -175,6 +187,8 @@ class OrderController extends Controller
                     'quantity' => $orderItem->quantity,
                     'user_id' => Auth()->user()->id,
                     'shop_id' => $order->shop_id,
+                    'quantity_before' => $qtyBefore,
+                    'quantity_after' => $qtyAfter,
                 ]);
             }
         }
@@ -202,8 +216,14 @@ class OrderController extends Controller
             $shopProd = ShopProduct::where('shop_id', $order->shop_id)
                 ->where('product_id', $orderItem->product_id)
                 ->first();
+
+            $qtyBefore = $shopProd->quantity;
+            $qtyAfter = null;
+
             $shopProd->quantity += (int) $itemQuantity;
             $shopProd->save();
+
+            $qtyAfter = $shopProd->quantity;
 
             StockMouvement::create([
                 'product_id' => $shopProd->product_id ?? null,
@@ -211,6 +231,8 @@ class OrderController extends Controller
                 'quantity' => $itemQuantity,
                 'user_id' => Auth()->user()->id,
                 'shop_id' => $order->shop_id,
+                'quantity_before' => $qtyBefore,
+                'quantity_after' => $qtyAfter,
             ]);
         }
 

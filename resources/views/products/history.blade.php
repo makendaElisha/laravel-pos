@@ -42,9 +42,11 @@
         <table class="table">
             <thead>
                 <tr>
-                    <th>Quantités</th>
                     <th>Article</th>
+                    <th>Qté du Mouvement</th>
                     <th>Action réalisée</th>
+                    <th>Qté Avant Action</th>
+                    <th>Qté Apres Action</th>
                     <th>Magasin</th>
                     <th>Date Du mouvement</th>
                 </tr>
@@ -52,12 +54,16 @@
             <tbody>
                 @foreach ($movements as $move)
                 @php
-                    $stock = (floor($move->product->quantity / $move->product->items_in_box)) . ' CRT Et ' . (floor($move->product->quantity % $move->product->items_in_box)) . ' PCE';
+                    $stock = (floor($move->quantity / $move->product->items_in_box)) . ' CRT Et ' . (floor($move->quantity % $move->product->items_in_box)) . ' PCE';
+                    $stockBefore = (floor($move->quantity_before / $move->product->items_in_box)) . ' CRT Et ' . (floor($move->quantity_before % $move->product->items_in_box)) . ' PCE';
+                    $stockAfter = (floor($move->quantity_after / $move->product->items_in_box)) . ' CRT Et ' . (floor($move->quantity_after % $move->product->items_in_box)) . ' PCE';
                 @endphp
                 <tr>
-                    <td>{{$move->quantity}}</td>
                     <td>[code: {{$move->product->code ?? ''}}] {{$move->product->name ?? ''}}</td>
+                    <td>{{$stock}}</td>
                     <td>{{movementTitle($move->type)}}</td>
+                    <td>{{$stockBefore}}</td>
+                    <td>{{$stockAfter}}</td>
                     <td>{{$move->shop->name ?? ''}}</td>
                     <td>{{$move->created_at}}</td>
                 </tr>

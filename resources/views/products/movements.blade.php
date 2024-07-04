@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('title', 'Movements')
-@section('content-header', 'Mouvement Du Stock')
+@section('content-header', 'Articles Reçus Au Magazin')
 @section('content-actions')
 @endsection
 

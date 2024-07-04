@@ -102,6 +102,8 @@ class ProductController extends Controller
         $isQuantityError = false;
         $totalQty = 0;
 
+        $qtyBeforeStore = $product->quantity;
+
         foreach ($quantities as $qty) {
             $totalQty += $qty;
         }
@@ -120,11 +122,18 @@ class ProductController extends Controller
                     'shop_id' => $shops[$key],
                 ]);
 
+                $qtyBeforeShop = $shopProduct->quantity;
+                $qtyAfterShop = null;
+
                 $shopProduct->quantity = ($shopProduct->quantity ?? 0) + $qty;
                 $shopProduct->save();
 
+                $qtyAfterShop = $shopProduct->quantity;
+
                 $product->quantity -= $qty;
                 $product->save();
+
+                $qtyAfterStore = $product->quantity;
 
                 //Log mouvement shop
                 UpdatedStock::create([
@@ -141,6 +150,8 @@ class ProductController extends Controller
                     'quantity' => $qty,
                     'user_id' => $request->user_id,
                     'shop_id' => $shops[$key],
+                    'quantity_before' => $qtyBeforeShop,
+                    'quantity_after' => $qtyAfterShop,
                 ]);
 
                 //Log mouvement store
@@ -150,6 +161,8 @@ class ProductController extends Controller
                     'quantity' => $qty,
                     'user_id' => $request->user_id,
                     'shop_id' => $shops[$key],
+                    'quantity_before' => $qtyBeforeStore,
+                    'quantity_after' => $qtyAfterStore,
                 ]);
             }
         }
@@ -197,6 +210,9 @@ class ProductController extends Controller
             'items_in_box' => $request->items_in_box,
         ]);
 
+        $qtyBefore = 0;
+        $qtyAfter = $product->quantity;
+
         foreach (Shop::get() as $key => $shop) {
             $shopProd = ShopProduct::firstOrCreate([
                 'product_id' => $product->id,
@@ -227,6 +243,8 @@ class ProductController extends Controller
                 'quantity' => $product->quantity,
                 'user_id' => Auth()->user()->id,
                 'shop_id' => $request->shop_id,
+                'quantity_before' => $qtyBefore,
+                'quantity_after' => $qtyAfter,
             ]);
         }
 
@@ -297,6 +315,8 @@ class ProductController extends Controller
     public function update(ProductUpdateRequest $request, Product $product)
     {
         $hasQuantityChanged = false;
+        $qtyBefore = $product->quantity;
+        $qtyAfter = null;
 
         // get quanitity
         $quantity = ($request->quantity_box * $request->items_in_box) + ($request->quantity_pce);
@@ -342,6 +362,8 @@ class ProductController extends Controller
             return redirect()->back()->with('error', 'Desolé, une erreur c\'est produite.');
         }
 
+        $qtyAfter = $product->quantity;
+
         if ($hasQuantityChanged) {
             //Log mouvement
             StockMouvement::create([
@@ -350,6 +372,8 @@ class ProductController extends Controller
                 'quantity' => $product->quantity,
                 'user_id' => Auth()->user()->id,
                 'shop_id' => $request->shop_id,
+                'quantity_before' => $qtyBefore,
+                'quantity_after' => $qtyAfter,
             ]);
         }
         return redirect()->route('products.index')->with('success', 'Succes, l\'article a été mise a jour.');

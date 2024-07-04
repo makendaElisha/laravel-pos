@@ -72,8 +72,14 @@ class ShopController extends Controller
     public function updateStock(Request $request, Shop $shop, Product $product)
     {
         $shopProd = ShopProduct::firstOrCreate(['shop_id', $shop->id, 'product_id', $product->id]);
+
+        $qtyBefore = $shopProd->quantity;
+        $qtyAfter = null;
+
         $shopProd->quantity += $request->quantity;
         $shopProd->save();
+
+        $qtyAfter = $shopProd->quantity;
 
         //Log mouvement
         StockMouvement::create([
@@ -82,6 +88,8 @@ class ShopController extends Controller
             'quantity' => $product->quantity,
             'user_id' => Auth()->user()->id,
             'shop_id' => $request->shop_id,
+            'quantity_before' => $qtyBefore,
+            'quantity_after' => $qtyAfter,
         ]);
 
         return response([

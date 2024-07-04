@@ -33,8 +33,14 @@ class ProductQuery extends Controller
         }
 
         $shopProd = ShopProduct::find($request->shop_prod_id);
+
+        $qtyBefore = $shopProd->quantity;
+        $qtyAfter = null;
+
         $shopProd->quantity = $quantity;
         $shopProd->save();
+
+        $qtyAfter = $shopProd->quantity;
 
         $success = true;
 
@@ -45,6 +51,8 @@ class ProductQuery extends Controller
             'quantity' => $quantity,
             'user_id' => $request->user_id,
             'shop_id' => $request->shop_id,
+            'quantity_before' => $qtyBefore,
+            'quantity_after' => $qtyAfter,
         ]);
 
         //Log notification shop
@@ -66,6 +74,10 @@ class ProductQuery extends Controller
         $success = false;
 
         $prod = Product::find($request->product_id);
+
+        $qtyBefore = $prod->quantity;
+        $qtyAfter = null;
+
         $boxes = $request->quantity_box;
         $pces = $request->quantity_pce;
 
@@ -78,6 +90,8 @@ class ProductQuery extends Controller
         $prod->quantity = $prod->quantity + $quantity;
         $prod->save();
 
+        $qtyAfter = $prod->quantity;
+
         $success = true;
 
         //Log mouvement
@@ -87,6 +101,8 @@ class ProductQuery extends Controller
                 'type' => StockMouvement::STORE_INCREASE,
                 'quantity' => $quantity,
                 'user_id' => $request->user_id,
+                'quantity_before' => $qtyBefore,
+                'quantity_after' => $qtyAfter,
             ]);
         }
 

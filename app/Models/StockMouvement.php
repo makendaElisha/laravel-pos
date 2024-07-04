@@ -25,6 +25,8 @@ class StockMouvement extends Model
         'quantity',
         'shop_id',
         'user_id',
+        'quantity_before',
+        'quantity_after',
     ];
 
     public function shop()
