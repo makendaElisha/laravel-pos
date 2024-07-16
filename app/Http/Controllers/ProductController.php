@@ -445,8 +445,17 @@ class ProductController extends Controller
 
         $shopId = '0';
         if (!$user->is_admin) {
+            $mouvementsFilter = [
+                StockMouvement::CREATE_BILL,
+                StockMouvement::CANCEL_BILL,
+                StockMouvement::SHOP_INCREASE,
+                StockMouvement::SHOP_EDITED,
+                StockMouvement::MANUAL_EDIT,
+            ];
+
             $shopId = Shop::where('name', $user->shop_name)->first()->id;
-            $movements = $movements->where('shop_id', $shopId);
+            $movements = $movements->where('shop_id', $shopId)
+                ->whereIn('type', $mouvementsFilter);
         }
 
         if( $user->is_admin && $request->shop) {
