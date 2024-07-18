@@ -45,7 +45,12 @@ class OrderController extends Controller
 
         $total = $orders->sum('paid');
 
-        $orders = $orders->with(['items', 'payments', 'user'])->latest()->paginate(10);
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $orders = $orders->with(['items', 'payments', 'user'])
+            ->latest()
+            ->paginate(10)
+            ->appends($queries);
 
         // $total = $orders->map(function($i) {
         //     return $i->total();
@@ -89,7 +94,12 @@ class OrderController extends Controller
 
         $total = $orders->sum('paid');
 
-        $orders = $orders->with(['items', 'payments', 'user'])->latest()->paginate(10);
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $orders = $orders->with(['items', 'payments', 'user'])
+            ->latest()
+            ->paginate(10)
+            ->appends($queries);
 
         return view('orders.deletedIndex', compact('orders',
             'user',

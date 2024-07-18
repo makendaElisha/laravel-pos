@@ -35,7 +35,9 @@ class ShopController extends Controller
             });
         }
 
-        $shopProducts = $shopProducts->paginate(10);
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $shopProducts = $shopProducts->paginate(10)->appends($queries);
         $shops = Shop::get();
 
         // foreach ($shopProducts as $key => $shopProd) {

@@ -35,7 +35,11 @@ class ProductController extends Controller
                 $products = $products->where('name', 'LIKE', "%{$request->search}%");
             }
         }
-        $products = $products->paginate(10);
+
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $products = $products->paginate(10)->appends($queries);
+
         $shops = Shop::get();
         $shopProducts = ShopProduct::get();
 
@@ -66,7 +70,9 @@ class ProductController extends Controller
             });
         }
 
-        $products = $products->latest()->paginate(10);
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $products = $products->latest()->paginate(10)->appends($queries);
 
         return response()->json([
             'products' => $products,
@@ -429,7 +435,9 @@ class ProductController extends Controller
             });
         }
 
-        $movements = $movements->with(['product', 'shop'])->latest()->paginate(10);
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $movements = $movements->with(['product', 'shop'])->latest()->paginate(10)->appends($queries);
 
         return view('products.movements', compact('movements',
             'user',
@@ -479,7 +487,9 @@ class ProductController extends Controller
             });
         }
 
-        $movements = $movements->with(['product', 'shop'])->latest()->paginate(20);
+        //Get query parameters and append to pagination
+        $queries = $request->query();
+        $movements = $movements->with(['product', 'shop'])->latest()->paginate(20)->appends($queries);
 
         return view('products.history', compact('movements',
             'user',
