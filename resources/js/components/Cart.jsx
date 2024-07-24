@@ -581,7 +581,7 @@ class Cart extends Component {
 
                                 <div style={{display: 'flex', justifyContent: 'space-between',}}>
                                     <div>FACTURE No: { orderToPrint?.order_number }</div>
-                                    <div>Date: { new Date().toLocaleDateString('en-GB') }</div>
+                                    <div>Date: <span style={{ fontWeight: 'bold', fontSize: '17px', }}>{ new Date().toLocaleDateString('en-GB') }</span></div>
                                 </div>
                                 <div style={{display: 'flex', justifyContent: 'space-between',}}>
                                     <div>Client: { orderToPrint?.customer }</div>
