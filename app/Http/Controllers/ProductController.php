@@ -467,7 +467,20 @@ class ProductController extends Controller
         }
 
         if( $user->is_admin && $request->shop) {
-            $movements = $movements->where('shop_id', $request->shop);
+            $storeTypes = [
+                \app\models\StockMouvement::STORE_INCREASE,
+                \app\models\StockMouvement::STORE_RETURN,
+                \app\models\StockMouvement::STORE_DECREASED,
+                \app\models\StockMouvement::MANUAL_EDIT,
+                \app\models\StockMouvement::INIT_STOCK
+            ];
+
+            if ($request->shop == '100') { // 100 is Depot
+                $movements = $movements->whereIn('type', $storeTypes);
+            } else {
+                $movements = $movements->where('shop_id', $request->shop)
+                    ->whereNotIn('type', $storeTypes);
+            }
             $shopId = $request->shop;
         }
 

@@ -19,6 +19,7 @@
                                 <option value="{{ $shop->id }}" @if($shopId==$shop->id) selected @endif>{{ $shop->name
                                     }}</option>
                                 @endforeach
+                                <option value="100" @if($shopId=='100') selected @endif>DEPOT</option>
                             </select>
                         </div>
                         <div class="col-md-2">
@@ -47,7 +48,7 @@
                     <th>Action réalisée</th>
                     <th>Qté Avant Action</th>
                     <th>Qté Apres Action</th>
-                    <th>Magasin</th>
+                    <th>Magasin/Depot</th>
                     <th>Date Du mouvement</th>
                 </tr>
             </thead>
@@ -64,7 +65,23 @@
                     <td>{{movementTitle($move->type)}}</td>
                     <td>{{$stockBefore}}</td>
                     <td>{{$stockAfter}}</td>
-                    <td>{{$move->shop->name ?? ''}}</td>
+                    @php
+                        $currentMovType = $move->type;
+                        $displayType = $move->shop->name;
+
+                        $storeTypes = [
+                            \app\models\StockMouvement::STORE_INCREASE,
+                            \app\models\StockMouvement::STORE_RETURN,
+                            \app\models\StockMouvement::STORE_DECREASED,
+                            \app\models\StockMouvement::MANUAL_EDIT,
+                            \app\models\StockMouvement::INIT_STOCK
+                        ];
+
+                        if ($currentMovType && in_array($currentMovType, $storeTypes)) {
+                            $displayType = "DEPOT";
+                        }
+                    @endphp
+                    <td>{{$displayType}}</td>
                     <td>{{$move->created_at}}</td>
                 </tr>
                 @endforeach
