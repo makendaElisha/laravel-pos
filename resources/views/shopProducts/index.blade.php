@@ -40,6 +40,7 @@
                     <th>Code</th>
                     <th>Description</th>
                     <th>Stock Magasin</th>
+                    <th>Stock Petit Depot</th>
                     <th>Pieces/Carton</th>
                     <th>Prix</th>
                     <th>Actions</th>
@@ -50,12 +51,16 @@
                 @php
                 // dump($shopProd);
                     $stock = (floor($shopProd->quantity / $shopProd->product->items_in_box)) . ' CRT Et ' . (floor($shopProd->quantity % $shopProd->product->items_in_box)) . ' PCE';
+                    $stockPetitDepot = (floor($shopProd->petit_depot_qty / $shopProd->product->items_in_box)) . ' CRT Et ' . (floor($shopProd->petit_depot_qty % $shopProd->product->items_in_box)) . ' PCE';
                 @endphp
                 <tr>
                     <td>{{$shopProd->product->code}}</td>
                     <td>{{$shopProd->product->name}}</td>
                     <td>
                         <div>{{$stock}}</div>
+                    </td>
+                    <td>
+                        <div>{{$stockPetitDepot}}</div>
                     </td>
                     <td>{{$shopProd->product->items_in_box}}</td>
                     <td>{{posprice($shopProd->sell_price)}} F.C</td>
@@ -70,6 +75,17 @@
                                 data-toggle="tooltip" data-placement="bottom" title="Modifier Stock au Magasin"
                             >
                                 <i class="fas fa-edit"></i>
+                            </button>
+
+                            <button class="btn btn-primary"
+                                data-toggle="modal"
+                                data-target="#transferPetitDepot"
+                                data-product="{{ $shopProd }}"
+                                data-inbox="{{ $shopProd->product->items_in_box }}"
+                                data-quantity="{{ $stockPetitDepot }}"
+                                data-toggle="tooltip" data-placement="bottom" title="Petit Depot vers Magasin"
+                            >
+                                <i class="fas fa-exchange"></i>
                             </button>
                         @else
                             {{-- <button class="btn btn-success"
@@ -124,6 +140,40 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="transferPetitDepot" tabindex="-1" role="dialog" aria-labelledby="updateStockLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title text-bold" id="updateStockLabelP"> Petit Depot {{ $shop->name }}: <div class="text-sm" id="articleNameP"><div></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h6><b>Stock au Petit Depot:</b> <u id="articleStockP" style="font-size: 1.2rem;" class="pr-1"></u></h6>
+                    <i id="articleDetailP"></i>
+                </div>
+                <div class="modal-body">
+                    <h5 class="modal-title" id="updateStockLabelP"><b class="text-danger">Transfer Du Petit Depot vers Magasin!</b> <div id="articleNameP"><div></h5>
+                    <div class="form-row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="inputBoxP">Nombre des CARTONS</label>
+                            <input type="number" id="inputBoxP" max="20" class="form-control" placeholder="Combien des cartons">
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="inputPceP">Nombre des PIECES:</label>
+                            <input type="number" id="inputPceP" max="20" class="form-control" placeholder="Combien des pieces">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex flex-row justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmButtonP">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
 
@@ -167,6 +217,59 @@
                 var quantity_pce = $("#inputPce").val();
 
                 $.post("/api/set-quantity/shop", {
+                    _token: '{{csrf_token()}}',
+                    is_admin:  is_admin,
+                    product_id: itemId,
+                    shop_prod_id: prodShop.id,
+                    trans_prod_id: prodShop.transfer_id,
+                    shop_id: $shop.id,
+                    quantity_box: quantity_box,
+                    quantity_pce: quantity_pce,
+                    user_id: $userId,
+                }, function (res) {
+                    console.log('RRRRR ', res);
+                    if (res.product) {
+                        location.reload();
+                    }
+                })
+            });
+        });
+
+
+        $('#transferPetitDepot').on('show.bs.modal', function (event) {
+            $this = $(this);
+            var $shop = {!! $shop !!};
+            var $user = {!! $user !!};
+            var is_admin = $user.is_admin ? 1 : 0;
+            var $userId = {!! $userId !!};
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var prodShop = button.data('product');
+            var qtyText = button.data('quantity');
+            var inbox = button.data('inbox');
+            var itemId = prodShop?.product.id;
+            var displayName = prodShop.product ? `${prodShop.product.name} (code: ${prodShop.product.code})` : '';
+
+            // Get box and pce
+            var current_box = 0;
+            var current_pce = prodShop.petit_depot_qty;
+
+            if (inbox && inbox > 0) {
+                current_box = Math.floor(Number(prodShop.petit_depot_qty) / Number(inbox));
+                current_pce = Number(prodShop.petit_depot_qty) % Number(inbox);
+            }
+
+            $(this).find('#articleNameP').text(displayName);
+            $(this).find('#articleStockP').text(qtyText ?? '');
+            $(this).find('#articleDetailP').text(`(1 Carton = ${inbox} Piece)`);
+
+            $(this).find('#inputBoxP').val(current_box);
+            $(this).find('#inputPceP').val(current_pce);
+
+            $('#confirmButtonP').click(function(){
+                var quantity_box = $("#inputBoxP").val();
+                var quantity_pce = $("#inputPceP").val();
+
+                $.post("/api/set-quantity-petit-depot/shop", {
                     _token: '{{csrf_token()}}',
                     is_admin:  is_admin,
                     product_id: itemId,

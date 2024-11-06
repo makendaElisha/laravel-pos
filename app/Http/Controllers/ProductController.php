@@ -104,17 +104,21 @@ class ProductController extends Controller
         $productId = $request->product_id;
         $shops = $request->shops;
         $quantities = $request->quantity;
+        $quantitiesPetitDepot = $request->quantitiesPetitDepot;
         $product = Product::find($productId);
         $isQuantityError = false;
         $totalQty = 0;
-
-        $qtyBeforeStore = $product->quantity;
+        $totalQtyPetitDepot = 0;
 
         foreach ($quantities as $qty) {
             $totalQty += $qty;
         }
 
-        if ($totalQty > $product->quantity) {
+        foreach ($quantitiesPetitDepot as $qty) {
+            $totalQtyPetitDepot += $qty;
+        }
+
+        if ($totalQty + $totalQtyPetitDepot > $product->quantity) {
             $validator = Validator::make([], []);
             $validator->errors()->add('quantity_exceded', 'This is the error message');
 
@@ -122,12 +126,52 @@ class ProductController extends Controller
         }
 
         foreach ($quantities as $key => $qty) {
-            if ($qty > 0) {
-                $shopProduct = ShopProduct::firstOrCreate([
-                    'product_id' => $productId,
-                    'shop_id' => $shops[$key],
-                ]);
+            $qtyPetitDepot = $quantitiesPetitDepot[$key];
 
+            $shopProduct = ShopProduct::firstOrCreate([
+                'product_id' => $productId,
+                'shop_id' => $shops[$key],
+            ]);
+
+
+            if ($qtyPetitDepot > 0) {
+                $shopProduct->petit_depot_qty = ($shopProduct->petit_depot_qty ?? 0) + $qtyPetitDepot;
+                $shopProduct->save();
+
+                $qtyBefore = $product->quantity;
+                $product->quantity -= $qtyPetitDepot;
+                $product->save();
+
+                // //Log mouvement shop
+                // StockMouvement::create([
+                //     'product_id' => $productId,
+                //     'type' => StockMouvement::SHOP_PETIT_DEPOT_INCREASE,
+                //     'quantity' => $qty,
+                //     'user_id' => $request->user_id,
+                //     'shop_id' => $shops[$key],
+                //     'quantity_before' => $qtyBefore,
+                //     'quantity_after' => $product->quantity,
+                // ]);
+
+                //Log mouvement store
+                StockMouvement::create([
+                    'product_id' => $productId,
+                    'type' => StockMouvement::STORE_DECREASED,
+                    'quantity' => $qtyPetitDepot,
+                    'user_id' => $request->user_id,
+                    'shop_id' => $shops[$key],
+                    'quantity_before' => $qtyBefore,
+                    'quantity_after' => $product->quantity,
+                ]);
+            }
+
+            if ($qty > 0) {
+                // $shopProduct = ShopProduct::firstOrCreate([
+                //     'product_id' => $productId,
+                //     'shop_id' => $shops[$key],
+                // ]);
+
+                // shop
                 $qtyBeforeShop = $shopProduct->quantity;
                 $qtyAfterShop = null;
 
@@ -136,6 +180,7 @@ class ProductController extends Controller
 
                 $qtyAfterShop = $shopProduct->quantity;
 
+                $qtyBeforeStore = $product->quantity;
                 $product->quantity -= $qty;
                 $product->save();
 

@@ -69,6 +69,55 @@ class ProductQuery extends Controller
         ], 200);
     }
 
+    public function setShopProductQuantityPetitDepot(Request $request)
+    {
+        $success = false;
+        $qtyBox = $request->quantity_box;
+        $qtyPce = $request->quantity_pce;
+        $product = Product::find($request->product_id);
+        $quantity = $qtyPce;
+
+        if ($qtyBox && $product->items_in_box > 0) {
+            $quantity = $qtyPce + floor($qtyBox * $product->items_in_box);
+        }
+
+        $shopProd = ShopProduct::find($request->shop_prod_id);
+
+        $qtyBefore = $shopProd->quantity;
+        $qtyAfter = null;
+
+        $shopProd->quantity = ($shopProd->quantity ?? 0) + $quantity;
+        $shopProd->petit_depot_qty = $shopProd->petit_depot_qty - $quantity;
+        $shopProd->save();
+
+        $qtyAfter = $shopProd->quantity;
+
+        $success = true;
+
+        //Log mouvement
+        StockMouvement::create([
+            'product_id' => $request->product_id,
+            'type' => StockMouvement::PETIT_DEPOT_VERS_MAGASIN,
+            'quantity' => $quantity,
+            'user_id' => $request->user_id,
+            'shop_id' => $request->shop_id,
+            'quantity_before' => $qtyBefore,
+            'quantity_after' => $qtyAfter,
+        ]);
+
+        // //Log notification shop
+        // UpdatedStock::create([
+        //     'product_id' => $request->product_id,
+        //     'quantity' => $quantity,
+        //     'sent_by' => $request->user_id,
+        //     'shop_id' => $request->shop_id,
+        // ]);\
+
+        return response()->json([
+            'product' => $success,
+        ], 200);
+    }
+
     public function setStoreProductQuantity(Request $request)
     {
         $success = false;

@@ -29,7 +29,8 @@
                     <tr>
                         <th>Magasin</th>
                         <th>Stock present au Magasin</th>
-                        <th>Quantité á Ajouter (Pieces)</th>
+                        <th>Approvisioner Magasin (Pieces)</th>
+                        <th>Approvisioner Petit Depot</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -43,6 +44,9 @@
                             <td id="action-button-{{ $shop->id }}">
                                 <input name="quantity[]" type="number">
                                 <input type="hidden" name="shops[]" value="{{ $shop->id }}">
+                            </td>
+                            <td>
+                                <input name="quantitiesPetitDepot[]" type="number">
                             </td>
                         </tr>
                     @endforeach

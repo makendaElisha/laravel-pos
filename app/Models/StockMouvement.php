@@ -15,6 +15,9 @@ class StockMouvement extends Model
     public const STORE_RETURN = 'store_return';
     public const STORE_DECREASED = 'store_decrease';
     public const SHOP_INCREASE = 'shop_increase';
+    public const SHOP_PETIT_DEPOT_INCREASE = 'shop_petit_depot_increase';
+    public const SHOP_PETIT_DEPOT_DECREASE = 'shop_petit_depot_decrease';
+    public const PETIT_DEPOT_VERS_MAGASIN = 'petit_depot_vers_magasin';
     public const SHOP_EDITED = 'shop_edited';
     public const MANUAL_EDIT = 'manual_edit';
     public const INIT_STOCK = 'init_stock';
