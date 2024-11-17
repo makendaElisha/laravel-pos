@@ -54,6 +54,12 @@ if (!function_exists('movementTitle')) {
             case 'init_stock':
                 $description = 'Stock initial a la creation de article';
                 break;
+            case 'shop_petit_depot_increase':
+                $description = 'Grand Depot vers Petit Depot';
+                break;
+            case 'petit_depot_vers_magasin':
+                $description = 'Petit depot vers magasin';
+                break;
 
             default:
                 $description = $name;

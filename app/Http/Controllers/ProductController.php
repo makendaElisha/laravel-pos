@@ -135,8 +135,10 @@ class ProductController extends Controller
 
 
             if ($qtyPetitDepot > 0) {
+                $petitDepotBefore = $shopProduct->petit_depot_qty ?? 0;
                 $shopProduct->petit_depot_qty = ($shopProduct->petit_depot_qty ?? 0) + $qtyPetitDepot;
                 $shopProduct->save();
+                $petitDepotAfter = $shopProduct->petit_depot_qty ?? 0;
 
                 $qtyBefore = $product->quantity;
                 $product->quantity -= $qtyPetitDepot;
@@ -162,6 +164,17 @@ class ProductController extends Controller
                     'shop_id' => $shops[$key],
                     'quantity_before' => $qtyBefore,
                     'quantity_after' => $product->quantity,
+                ]);
+
+                //Log mouvement petit depot
+                StockMouvement::create([
+                    'product_id' => $productId,
+                    'type' => StockMouvement::SHOP_PETIT_DEPOT_INCREASE,
+                    'quantity' => $qtyPetitDepot,
+                    'user_id' => $request->user_id,
+                    'shop_id' => $shops[$key],
+                    'quantity_before' => $petitDepotBefore,
+                    'quantity_after' => $petitDepotAfter,
                 ]);
             }
 

@@ -16,6 +16,7 @@ class UpdatedStock extends Model
         'shop_id',
         'sent_by',
         'seen_by',
+        'is_from_petit_depot',
     ];
 
     /**

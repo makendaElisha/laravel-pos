@@ -105,13 +105,14 @@ class ProductQuery extends Controller
             'quantity_after' => $qtyAfter,
         ]);
 
-        // //Log notification shop
-        // UpdatedStock::create([
-        //     'product_id' => $request->product_id,
-        //     'quantity' => $quantity,
-        //     'sent_by' => $request->user_id,
-        //     'shop_id' => $request->shop_id,
-        // ]);\
+        //Log notification shop
+        UpdatedStock::create([
+            'product_id' => $request->product_id,
+            'quantity' => $quantity,
+            'sent_by' => $request->user_id,
+            'shop_id' => $request->shop_id,
+            'is_from_petit_depot' => true,
+        ]);
 
         return response()->json([
             'product' => $success,

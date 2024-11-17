@@ -46,6 +46,7 @@
                     <th>Nom Article</th>
                     <th>Code Article</th>
                     <th>Quantity reçue</th>
+                    <th>Origine</th>
                     <th>Date reception</th>
                 </tr>
             </thead>
@@ -59,6 +60,7 @@
                     <td>{{$move->product->name ?? ''}}</td>
                     <td>{{$move->product->code ?? ''}}</td>
                     <td>{{$stock}}</td>
+                    <td>{{$move->is_from_petit_depot == true ? "Petit Depot" : "Depot"}}</td>
                     <td>{{$move->created_at}}</td>
                 </tr>
                 @endforeach
