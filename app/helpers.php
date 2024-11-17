@@ -60,6 +60,9 @@ if (!function_exists('movementTitle')) {
             case 'petit_depot_vers_magasin':
                 $description = 'Petit depot vers magasin';
                 break;
+            case 'petit_depot_edited':
+                $description = 'Petit depot saisi par admin';
+                break;
 
             default:
                 $description = $name;

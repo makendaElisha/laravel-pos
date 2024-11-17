@@ -60,7 +60,24 @@
                         <div>{{$stock}}</div>
                     </td>
                     <td>
-                        <div>{{$stockPetitDepot}}</div>
+                        <div class="row">
+                            <div>{{$stockPetitDepot}}</div>
+                            <div class="ml-2 mt-0">
+                                @if ($user->is_admin)
+                                    <button class="btn btn-primary"
+                                        data-toggle="modal"
+                                        data-target="#updateStockPetitDepot"
+                                        data-product="{{ $shopProd }}"
+                                        data-inbox="{{ $shopProd->product->items_in_box }}"
+                                        data-quantity="{{ $stockPetitDepot }}"
+                                        data-toggle="tooltip" data-placement="bottom" title="Modifier Stock Petit Depot"
+                                    >
+                                        <i class="fas fa-pencil"></i>
+                                    </button>
+                                @endif
+                            </div>
+                        </div>
+
                     </td>
                     <td>{{$shopProd->product->items_in_box}}</td>
                     <td>{{posprice($shopProd->sell_price)}} F.C</td>
@@ -136,6 +153,40 @@
                 <div class="modal-footer d-flex flex-row justify-content-between">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-primary" id="confirmButton">Valider</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="updateStockPetitDepot" tabindex="-1" role="dialog" aria-labelledby="updateStockLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateStockLabel"> {{ $shop->name }}: <div id="articleName"><div></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-header">
+                    <h6><b>Quantité Presente:</b> <u id="articleStock" style="font-size: 1.2rem;" class="pr-1"></u></h6>
+                    <i id="articleDetail"></i>
+                </div>
+                <div class="modal-body">
+                    <h5 class="modal-title" id="updateStockLabel"><b class="text-danger">Modification Petit Depot!</b> <div id="articleName"><div></h5>
+                    <div class="form-row mt-2">
+                        <div class="form-group col-md-6">
+                            <label for="inputBox">Nombre des CARTONS</label>
+                            <input type="number" id="inputBoxdepot" max="20" class="form-control" placeholder="Combien des cartons">
+                        </div>
+
+                        <div class="form-group col-md-6">
+                            <label for="inputPce">Nombre des PIECES:</label>
+                            <input type="number" id="inputPcedepot" max="20" class="form-control" placeholder="Combien des pieces">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer d-flex flex-row justify-content-between">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" id="confirmButtondepot">Valider</button>
                 </div>
             </div>
         </div>
@@ -235,6 +286,57 @@
             });
         });
 
+        $('#updateStockPetitDepot').on('show.bs.modal', function (event) {
+            $this = $(this);
+            var $shop = {!! $shop !!};
+            var $user = {!! $user !!};
+            var is_admin = $user.is_admin ? 1 : 0;
+            var $userId = {!! $userId !!};
+            var button = $(event.relatedTarget); // Button that triggered the modal
+            var prodShop = button.data('product');
+            var qtyText = button.data('quantity');
+            var inbox = button.data('inbox');
+            var itemId = prodShop?.product.id;
+            var displayName = prodShop.product ? `${prodShop.product.name} (code: ${prodShop.product.code})` : '';
+
+            // Get box and pce
+            var current_box = 0;
+            var current_pce = prodShop.petit_depot_qty;
+
+            if (inbox && inbox > 0) {
+                current_box = Math.floor(Number(prodShop.petit_depot_qty) / Number(inbox));
+                current_pce = Number(prodShop.petit_depot_qty) % Number(inbox);
+            }
+
+            $(this).find('#articleName').text(displayName);
+            $(this).find('#articleStock').text(qtyText ?? '');
+            $(this).find('#articleDetail').text(`(1 Carton = ${inbox} Piece)`);
+
+            $(this).find('#inputBoxdepot').val(current_box);
+            $(this).find('#inputPcedepot').val(current_pce);
+
+            $('#confirmButtondepot').click(function(){
+                var quantity_box = $("#inputBoxdepot").val();
+                var quantity_pce = $("#inputPcedepot").val();
+
+                $.post("/api/set-quantity-petit-depot/shop", {
+                    _token: '{{csrf_token()}}',
+                    is_admin:  is_admin,
+                    product_id: itemId,
+                    shop_prod_id: prodShop.id,
+                    trans_prod_id: prodShop.transfer_id,
+                    shop_id: $shop.id,
+                    quantity_box: quantity_box,
+                    quantity_pce: quantity_pce,
+                    user_id: $userId,
+                }, function (res) {
+                    console.log('RRRRR ', res);
+                    if (res.product) {
+                        location.reload();
+                    }
+                })
+            });
+        });
 
         $('#transferPetitDepot').on('show.bs.modal', function (event) {
             $this = $(this);
@@ -269,7 +371,7 @@
                 var quantity_box = $("#inputBoxP").val();
                 var quantity_pce = $("#inputPceP").val();
 
-                $.post("/api/set-quantity-petit-depot/shop", {
+                $.post("/api/send-quantity-petit-depot/shop", {
                     _token: '{{csrf_token()}}',
                     is_admin:  is_admin,
                     product_id: itemId,

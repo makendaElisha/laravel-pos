@@ -83,6 +83,55 @@ class ProductQuery extends Controller
 
         $shopProd = ShopProduct::find($request->shop_prod_id);
 
+        $qtyBefore = $shopProd->petit_depot_qty;
+        $qtyAfter = null;
+
+        $shopProd->petit_depot_qty = $quantity;
+        $shopProd->save();
+
+        $qtyAfter = $shopProd->petit_depot_qty;
+
+        $success = true;
+
+        //Log mouvement
+        StockMouvement::create([
+            'product_id' => $request->product_id,
+            'type' => StockMouvement::PETIT_DEPOT_EDITED,
+            'quantity' => $quantity,
+            'user_id' => $request->user_id,
+            'shop_id' => $request->shop_id,
+            'quantity_before' => $qtyBefore,
+            'quantity_after' => $qtyAfter,
+        ]);
+
+        //Log notification shop
+        // UpdatedStock::create([
+        //     'product_id' => $request->product_id,
+        //     'quantity' => $quantity,
+        //     'sent_by' => $request->user_id,
+        //     'shop_id' => $request->shop_id,
+        // ]);
+
+
+        return response()->json([
+            'product' => $success,
+        ], 200);
+    }
+
+    public function sendShopProductQuantityPetitDepot(Request $request)
+    {
+        $success = false;
+        $qtyBox = $request->quantity_box;
+        $qtyPce = $request->quantity_pce;
+        $product = Product::find($request->product_id);
+        $quantity = $qtyPce;
+
+        if ($qtyBox && $product->items_in_box > 0) {
+            $quantity = $qtyPce + floor($qtyBox * $product->items_in_box);
+        }
+
+        $shopProd = ShopProduct::find($request->shop_prod_id);
+
         $qtyBefore = $shopProd->quantity;
         $qtyAfter = null;
 
