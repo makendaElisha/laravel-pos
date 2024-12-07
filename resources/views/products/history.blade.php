@@ -67,7 +67,7 @@
                     <td>{{$stockAfter}}</td>
                     @php
                         $currentMovType = $move->type;
-                        $displayType = $move->shop->name;
+                        $displayType = $move->shop->name ?? "DEPOT";
 
                         $storeTypes = [
                             \app\models\StockMouvement::STORE_INCREASE,
@@ -76,6 +76,10 @@
                             \app\models\StockMouvement::MANUAL_EDIT,
                             \app\models\StockMouvement::INIT_STOCK
                         ];
+
+                        if ($move->type == \app\models\StockMouvement::SHOP_PETIT_DEPOT_INCREASE) {
+                            $displayType = $move->shop->name != null ? "Petit Depot $displayType" : "";
+                        }
 
                         if ($currentMovType && in_array($currentMovType, $storeTypes)) {
                             $displayType = "DEPOT";
