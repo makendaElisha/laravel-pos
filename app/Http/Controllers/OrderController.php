@@ -119,6 +119,7 @@ class OrderController extends Controller
             'order_number' => $invNumber ? $invNumber + 1 : 1,
             'shop_id' => $request->shop_id,
             'customer' => $request->customer,
+            'phone' => $request->phone,
             'user_id' => $request->user()->id,
             'total' => $request->total,
             'discount' => $request->discount,

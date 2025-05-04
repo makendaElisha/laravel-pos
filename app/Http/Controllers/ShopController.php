@@ -17,16 +17,15 @@ class ShopController extends Controller
     public function index(Request $request, Shop $shop)
     {
         $search = $request->search;
+    
         $shopProducts = ShopProduct::with('product')
             ->where('shop_id', $shop->id)
             ->whereHas('product', function ($query) {
-                // Add a condition to check if the product exists
                 $query->whereNotNull('id');
             });
-
+    
         if ($search) {
             $shopProducts->whereHas('product', function($q) use($search) {
-                // check if is code
                 if ((int)$search == $search) {
                     $q->where('code', '=', $search);
                 } else {
@@ -34,29 +33,26 @@ class ShopController extends Controller
                 }
             });
         }
-
-        //Get query parameters and append to pagination
+    
+        //Sort using subquery (preserves eager loading)
+        $shopProducts = $shopProducts->orderBy(
+            Product::select('name')
+                ->whereColumn('products.id', 'shop_products.product_id')
+                ->limit(1)
+        );
+    
+        // Pagination with query parameters
         $queries = $request->query();
         $shopProducts = $shopProducts->paginate(10)->appends($queries);
+    
         $shops = Shop::get();
-
-        // foreach ($shopProducts as $key => $shopProd) {
-        //     $trans = TransferShopProduct::where('shop_id', $shop->id)
-        //         ->where('product_id', $shopProd->product_id)
-        //         ->first();
-        //     if ($trans) {
-        //         $shopProd->transfer_quantity = $trans->quantity;
-        //         $shopProd->transfer_id = $trans->id;
-        //     }
-
-        // }
-
+    
         return view('shopProducts.index')->with([
             'products' => $shopProducts,
             'shop' => $shop,
             'shops' => $shops,
-            'user' => Auth()->user(),
-            'userId' => Auth()->user()->id,
+            'user' => auth()->user(),
+            'userId' => auth()->user()->id,
         ]);
     }
 

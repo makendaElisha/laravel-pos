@@ -36,6 +36,9 @@ class ProductController extends Controller
             }
         }
 
+        // Apply sorting
+        $products = $products->orderBy('name', 'asc');
+
         //Get query parameters and append to pagination
         $queries = $request->query();
         $products = $products->paginate(10)->appends($queries);

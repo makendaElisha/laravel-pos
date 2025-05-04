@@ -93,7 +93,7 @@ class CartReprint extends Component {
     }
 
     render() {
-        const { cart, products, customers,customer, code, orderToPrint, currentShop } = this.state;
+        const { cart, products, customers,customer, phone, code, orderToPrint, currentShop } = this.state;
 
         // Define the styles for the outer div
         const containerStyle = {
@@ -130,6 +130,15 @@ class CartReprint extends Component {
                                 className="form-control"
                                 value={orderToPrint?.customer}
                                 placeholder="Nom du Client"
+                                readOnly
+                            />
+                        </div>
+                        <div className="col">
+                            <input
+                                type="text"
+                                className="form-control"
+                                value={orderToPrint?.phone}
+                                placeholder="Numero de telephone"
                                 readOnly
                             />
                         </div>
@@ -220,6 +229,9 @@ class CartReprint extends Component {
                                 </div>
                                 <div style={{display: 'flex', justifyContent: 'space-between',}}>
                                     <div>Client: { orderToPrint?.customer }</div>
+                                </div>
+                                <div style={{display: 'flex', justifyContent: 'space-between',}}>
+                                    <div>Phone: { orderToPrint?.phone }</div>
                                 </div>
 
                                 <table style={tableStyle}>

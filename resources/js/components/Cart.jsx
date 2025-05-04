@@ -17,6 +17,7 @@ class Cart extends Component {
             search: "",
             customer_id: "",
             customer: "",
+            phone: "",
             discount: null,
             discountPercent: null,
             shopId: null,
@@ -203,6 +204,7 @@ class Cart extends Component {
     }
     handleEmptyCart() {
         this.setState({ customer: "" });
+        this.setState({ phone: "" });
         this.setState({ cart: [] });
     }
     handleChangeSearch(event) {
@@ -270,6 +272,10 @@ class Cart extends Component {
     setCustomer(event) {
         this.setState({ customer: event });
     }
+
+    setPhone(event) {
+        this.setState({ phone: event });
+    }
     handleClickSubmit() {
         //check for null quantities
         if (this.state.cart.find((item) => !item.final_quantity)) {
@@ -295,6 +301,7 @@ class Cart extends Component {
                 return axios
                     .post("/admin/cart-orders", {
                         customer: this.state.customer,
+                        phone: this.state.phone,
                         shop_id: this.state.shopId,
                         cart: this.state.cart,
                         total: this.getTotal(this.state.cart),
@@ -309,6 +316,7 @@ class Cart extends Component {
                             this.setState({ orderToPrint: res.data.order });
                             this.setState({ cart: [] });
                             this.setState({ customer: '' });
+                            this.setState({ phone: '' });
                             this.handlePrinting();
                         }
                     })
@@ -389,7 +397,7 @@ class Cart extends Component {
     }
 
     render() {
-        const { cart, products, customers,customer, code, orderToPrint, currentShop } = this.state;
+        const { cart, products, customers, customer, phone, code, orderToPrint, currentShop } = this.state;
 
         // Define the styles for the outer div
         const containerStyle = {
@@ -439,6 +447,17 @@ class Cart extends Component {
                                 placeholder="Nom du Client"
                                 onChange={(event) =>
                                     this.setCustomer(
+                                        event.target.value
+                                    )
+                                }
+                            />
+                            <input
+                                type="text"
+                                className="form-control mt-1"
+                                value={phone}
+                                placeholder="Numero de telephone"
+                                onChange={(event) =>
+                                    this.setPhone(
                                         event.target.value
                                     )
                                 }
@@ -585,6 +604,9 @@ class Cart extends Component {
                                 </div>
                                 <div style={{display: 'flex', justifyContent: 'space-between',}}>
                                     <div>Client: { orderToPrint?.customer }</div>
+                                </div>
+                                <div style={{display: 'flex', justifyContent: 'space-between',}}>
+                                    <div>Telephone: { orderToPrint?.phone }</div>
                                 </div>
 
                                 <table style={tableStyle}>
